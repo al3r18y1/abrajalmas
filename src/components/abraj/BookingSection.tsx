@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, Send, MessageCircle, ArrowRight, Sparkles } from "lucide-react";
 import { translations, WA_NUMBER, type Lang } from "./translations";
@@ -42,12 +42,20 @@ const initialData: BookingData = {
   preferredContactMethod: "",
 };
 
-export function BookingSection({ lang, theme }: { lang: Lang; theme: Theme }) {
+export function BookingSection({ lang, theme, standalone = false }: { lang: Lang; theme: Theme; standalone?: boolean }) {
   const t = translations[lang].booking;
   const isAr = lang === "ar";
   const [step, setStep] = useState(1);
   const [data, setData] = useState<BookingData>(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const topRef = useRef<HTMLElement>(null);
+
+  // Scroll to top of section whenever step changes
+  useEffect(() => {
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [step]);
 
   const update = (field: keyof BookingData, value: any) =>
     setData((d) => ({ ...d, [field]: value }));
@@ -97,7 +105,7 @@ export function BookingSection({ lang, theme }: { lang: Lang; theme: Theme }) {
   };
 
   return (
-    <section id="booking" className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
+    <section ref={topRef} id="booking" className={`relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 ${standalone ? "scroll-mt-16" : "scroll-mt-20"}`}>
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

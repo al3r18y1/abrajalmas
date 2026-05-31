@@ -310,7 +310,7 @@ function Navbar({
 
         <nav className="hidden lg:flex items-center gap-1">
           {links.map((l) => (
-            <a key={l.id} href={`#${l.id}`} className={`px-3 py-2 text-sm transition-colors hover:text-[#1d3fba] ${tc(theme, "text-[#e9e9e9]", "text-[#3d4451]")}`}>{l.label}</a>
+            <a key={l.id} href={l.id === "booking" ? "/booking" : `#${l.id}`} className={`px-3 py-2 text-sm transition-colors hover:text-[#1d3fba] ${tc(theme, "text-[#e9e9e9]", "text-[#3d4451]")}`}>{l.label}</a>
           ))}
         </nav>
 
@@ -320,7 +320,7 @@ function Navbar({
           <ThemeToggle theme={theme} setTheme={setTheme} lang={lang} />
           <div className={`hidden sm:block w-px h-5 ${tc(theme, "bg-white/15", "bg-[#1d3fba]/15")}`} />
           <a
-            href="#booking"
+            href="/booking"
             className="hidden sm:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#1d3fba] text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all blue-glow"
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -342,13 +342,13 @@ function Navbar({
           >
             <div className="px-4 py-4 flex flex-col gap-1">
               {links.map((l) => (
-                <a key={l.id} href={`#${l.id}`} onClick={() => setOpen(false)} className={`py-2.5 px-3 rounded-lg transition-colors ${tc(theme, "text-[#e9e9e9] hover:bg-white/5", "text-[#3d4451] hover:bg-[#1d3fba]/5")}`}>{l.label}</a>
+                <a key={l.id} href={l.id === "booking" ? "/booking" : `#${l.id}`} onClick={() => setOpen(false)} className={`py-2.5 px-3 rounded-lg transition-colors ${tc(theme, "text-[#e9e9e9] hover:bg-white/5", "text-[#3d4451] hover:bg-[#1d3fba]/5")}`}>{l.label}</a>
               ))}
               <div className="flex items-center gap-2 py-2 px-3">
                 <LangToggle lang={lang} setLang={setLang} theme={theme} />
                 <ThemeToggle theme={theme} setTheme={setTheme} lang={lang} />
               </div>
-              <a href="#booking" onClick={() => setOpen(false)} className="mt-2 text-center py-3 rounded-xl bg-[#1d3fba] text-white font-bold">{t.cta}</a>
+              <a href="/booking" onClick={() => setOpen(false)} className="mt-2 text-center py-3 rounded-xl bg-[#1d3fba] text-white font-bold">{t.cta}</a>
             </div>
           </motion.div>
         )}
@@ -445,7 +445,7 @@ function Hero({ lang, theme }: { lang: Lang; theme: Theme }) {
             {t.para}
           </motion.p>
           <motion.div variants={buttonsAnim} className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <a href="#booking" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1d3fba] text-white font-bold hover:brightness-110 blue-glow transition-all">
+            <a href="/booking" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1d3fba] text-white font-bold hover:brightness-110 blue-glow transition-all">
               {t.primary} <ChevronRight className="w-4 h-4" />
             </a>
             <a href="#services" className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border backdrop-blur-md transition-colors ${tc(theme, "border-white/15 bg-white/[0.04] text-white hover:bg-white/[0.08]", "border-[#1d3fba]/20 bg-white/60 text-[#111111] hover:bg-white/90")}` }>
@@ -793,7 +793,7 @@ function ServicesSection({ lang, theme }: { lang: Lang; theme: Theme }) {
                       </li>
                     ))}
                   </ul>
-                  <a href="#booking" className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full border text-sm transition-all hover:bg-[#1d3fba]/15 hover:border-[#1d3fba]/60 ${tc(theme, "bg-white/[0.04] border-white/10 text-white", "bg-white/40 border-[#1d3fba]/15 text-[#111111]")}` }>
+                  <a href="/booking" className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full border text-sm transition-all hover:bg-[#1d3fba]/15 hover:border-[#1d3fba]/60 ${tc(theme, "bg-white/[0.04] border-white/10 text-white", "bg-white/40 border-[#1d3fba]/15 text-[#111111]")}` }>
                     {t.bookCta} <ChevronRight className="w-3.5 h-3.5" />
                   </a>
                 </GlowCard>
@@ -994,7 +994,7 @@ function ContactSection({ lang, theme }: { lang: Lang; theme: Theme }) {
               <a href={waLink} target="_blank" rel="noreferrer" className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-colors ${tc(theme, "bg-emerald-500/15 border-emerald-500/30 text-white hover:bg-emerald-500/20", "bg-emerald-500/10 border-emerald-600/40 text-emerald-800 hover:bg-emerald-500/20")}`}>
                 <MessageCircle className="w-4 h-4" />{t.quick.wa}
               </a>
-              <a href="#booking" className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:brightness-110 ${tc(theme, "bg-[#1d3fba] text-white", "bg-[#1d3fba] text-white")}`}>
+              <a href="/booking" className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:brightness-110 ${tc(theme, "bg-[#1d3fba] text-white", "bg-[#1d3fba] text-white")}`}>
                 <Sparkles className="w-4 h-4" />{t.quick.book}
               </a>
               <a href={`mailto:${EMAIL}`} className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-colors ${tc(theme, "bg-[#1d3fba]/20 border-[#1d3fba]/40 text-white hover:bg-[#1d3fba]/30", "bg-[#1d3fba]/10 border-[#1d3fba]/30 text-[#1d3fba] hover:bg-[#1d3fba]/20")}`}>
@@ -1064,7 +1064,7 @@ function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
     { label: isAr ? "من نحن"       : "About",    href: "#about" },
     { label: isAr ? "رؤيتنا"       : "Vision",   href: "#about" },
     { label: isAr ? "الخدمات"      : "Services", href: "#services" },
-    { label: isAr ? "الحجز"        : "Booking",  href: "#booking" },
+    { label: isAr ? "الحجز"        : "Booking",  href: "/booking" },
     { label: isAr ? "المشاريع"     : "Projects", href: "#projects" },
     { label: isAr ? "الشركاء"      : "Partners", href: "#partners" },
     { label: isAr ? "تواصل معنا"   : "Contact",  href: "#contact" },
@@ -1181,7 +1181,7 @@ function FloatingActions({ lang, theme }: { lang: Lang; theme: Theme }) {
         <MessageCircle className="w-6 h-6 text-white" />
       </motion.a>
       <motion.a
-        href="#booking"
+        href="/booking"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.96 }}
         className="hidden sm:inline-flex items-center gap-1.5 px-4 h-12 rounded-full bg-[#1d3fba] text-white font-bold text-sm hover:brightness-110 blue-glow transition-all"
