@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportError } from "../lib/error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -38,7 +38,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -77,18 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "A premium, bilingual corporate website for ABRAJ ALMAS, offering technology solutions and a client booking system." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "A premium, bilingual corporate website for ABRAJ ALMAS, offering technology solutions and a client booking system." },
+      { title: "أبراج الماس | حلول الشبكات والكاميرات وتقنية المعلومات في العراق" },
+      { name: "description", content: "أبراج الماس — شركة عراقية متخصصة في حلول الشبكات، أنظمة المراقبة، البنية التحتية لتكنولوجيا المعلومات، والبرمجيات المؤسسية. نخدم قطاع الأعمال منذ 2022." },
+      { name: "author", content: "The Vision Center | مركز الرؤية للابتكار الرقمي" },
+      { property: "og:title", content: "أبراج الماس — حلول التقنية المؤسسية | شبكات · كاميرات · برمجيات" },
+      { property: "og:description", content: "شريكك التقني الموثوق في العراق. نقدم حلول الشبكات، أنظمة CCTV، الجهد المنخفض، والبرمجيات المؤسسية. احجز استشارتك اليوم." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "A premium, bilingual corporate website for ABRAJ ALMAS, offering technology solutions and a client booking system." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af548d30-950b-45b6-bde3-3fde91225c32/id-preview-c48132ce--7ea4d54e-94a5-46a0-8721-fe82e8019b87.lovable.app-1780241558605.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af548d30-950b-45b6-bde3-3fde91225c32/id-preview-c48132ce--7ea4d54e-94a5-46a0-8721-fe82e8019b87.lovable.app-1780241558605.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@abrajalmas" },
+      { name: "twitter:title", content: "أبراج الماس — حلول التقنية المؤسسية" },
+      { name: "twitter:description", content: "شريكك التقني الموثوق في العراق. شبكات، كاميرات، برمجيات، وبنية تحتية متكاملة." },
+      { property: "og:image", content: "/assets/og-image.png" },
+      { name: "twitter:image", content: "/assets/og-image.png" },
     ],
     links: [
       {
