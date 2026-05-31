@@ -915,43 +915,30 @@ function ProjectsSection({ lang, theme }: { lang: Lang; theme: Theme }) {
 function PartnersMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
   const t = translations[lang].partners;
 
-  const Card = ({ p, idx }: { p: string; idx: number }) => {
-    const meta = PARTNER_META[p] ?? { initials: p.slice(0, 2).toUpperCase(), color: "#1d3fba", bg: "rgba(29,63,186,0.12)" };
-    return (
-      <div
-        key={`${p}-${idx}`}
-        className="glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 min-w-[130px] w-[130px] flex-shrink-0"
-      >
-        <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black tracking-tight shrink-0 border"
-          style={{ background: meta.bg, color: meta.color, borderColor: `${meta.color}40`, boxShadow: `0 0 12px ${meta.color}22` }}
-        >
-          {meta.initials}
-        </div>
-        <span className={`text-xs font-bold tracking-wide text-center leading-tight ${tc(theme, "text-white/80", "text-[#111111]/75")}`}>{p}</span>
-      </div>
-    );
-  };
-
   return (
     <section id="partners" className="relative py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <SectionHeader title={t.title} subtitle={t.subtitle} lang={lang} theme={theme} />
-      </div>
-
-      <div className="relative overflow-hidden mask-fade">
-        {/* Two identical groups side-by-side. pe-4 on each group adds a trailing gap
-            equal to the inner gap-4, so -50% translateX lands exactly at group-2's start. */}
-        <div
-          className="flex"
-          style={{ direction: "ltr", width: "max-content", animation: "marquee 30s linear infinite" }}
-        >
-          <div className="flex gap-4 pe-4">
-            {PARTNERS.map((p, i) => <Card key={`a-${i}`} p={p} idx={i} />)}
-          </div>
-          <div className="flex gap-4 pe-4">
-            {PARTNERS.map((p, i) => <Card key={`b-${i}`} p={p} idx={i} />)}
-          </div>
+        <div className="flex flex-wrap justify-center gap-4">
+          {PARTNERS.map((p) => {
+            const meta = PARTNER_META[p] ?? { initials: p.slice(0, 2).toUpperCase(), color: "#1d3fba", bg: "rgba(29,63,186,0.12)" };
+            return (
+              <motion.div
+                key={p}
+                whileHover={{ scale: 1.06, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className={`glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 w-[130px] cursor-default ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/40")}`}
+              >
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black tracking-tight shrink-0 border transition-all duration-300"
+                  style={{ background: meta.bg, color: meta.color, borderColor: `${meta.color}40`, boxShadow: `0 0 12px ${meta.color}22` }}
+                >
+                  {meta.initials}
+                </div>
+                <span className={`text-xs font-bold tracking-wide text-center leading-tight ${tc(theme, "text-white/80", "text-[#111111]/75")}`}>{p}</span>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
