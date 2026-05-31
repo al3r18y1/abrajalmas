@@ -942,14 +942,12 @@ function PartnersMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
       </div>
 
       <div className="relative overflow-hidden mask-fade">
-        <motion.div
+        <div
           className="flex gap-4"
-          style={{ direction: "ltr", width: "max-content" }}
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 30, ease: "linear", repeat: Infinity, repeatType: "loop" }}
+          style={{ direction: "ltr", width: "max-content", animation: "marquee 30s linear infinite" }}
         >
           {doubled.map((p, i) => <Card key={`${p}-${i}`} p={p} idx={i} />)}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
