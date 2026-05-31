@@ -338,12 +338,22 @@ function Navbar({
     { id: "contact", label: t.contact },
   ];
 
-  const navBg = scrolled
-    ? tc(theme, "bg-black/80 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/20", "bg-white/95 backdrop-blur-2xl border-b border-[#1d3fba]/15 shadow-sm")
-    : tc(theme, "bg-black/20 backdrop-blur-md", "bg-white/40 backdrop-blur-md");
+  const navStyle: React.CSSProperties = {
+    background: scrolled
+      ? (theme === "night" ? "rgba(5,5,5,0.92)" : "rgba(255,255,255,0.97)")
+      : (theme === "night" ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.40)"),
+    backdropFilter: "blur(24px)",
+    WebkitBackdropFilter: "blur(24px)",
+    borderBottom: scrolled
+      ? `1px solid ${theme === "night" ? "rgba(255,255,255,0.10)" : "rgba(29,63,186,0.15)"}`
+      : "none",
+    boxShadow: scrolled
+      ? (theme === "night" ? "0 4px 24px rgba(0,0,0,0.50)" : "0 2px 8px rgba(0,0,0,0.06)")
+      : "none",
+  };
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${navBg}`}>
+    <header style={navStyle} className="fixed top-0 inset-x-0 z-50 transition-all duration-300">
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 transition-all duration-300 ${scrolled ? "h-14 sm:h-16" : "h-16 sm:h-20"}`}>
         <a href="#home" className="flex items-center gap-2 flex-shrink-0">
           <motion.img
