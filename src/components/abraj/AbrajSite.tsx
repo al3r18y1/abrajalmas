@@ -914,17 +914,14 @@ function ProjectsSection({ lang, theme }: { lang: Lang; theme: Theme }) {
 /* ---------------- Partners marquee ---------------- */
 function PartnersMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
   const t = translations[lang].partners;
-  // 4 copies for seamless infinite scroll
-  const quad = useMemo(() => [...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS], []);
-  // Split into two interleaved rows for visual depth
-  const rowA = useMemo(() => quad.filter((_, i) => i % 2 === 0), [quad]);
-  const rowB = useMemo(() => quad.filter((_, i) => i % 2 === 1), [quad]);
+  // Double the list — animate from 0 to -50% for a seamless loop
+  const doubled = useMemo(() => [...PARTNERS, ...PARTNERS], []);
 
-  const Card = ({ p, i }: { p: string; i: number }) => {
+  const Card = ({ p, idx }: { p: string; idx: number }) => {
     const meta = PARTNER_META[p] ?? { initials: p.slice(0, 2).toUpperCase(), color: "#1d3fba", bg: "rgba(29,63,186,0.12)" };
     return (
       <div
-        key={`${p}-${i}`}
+        key={`${p}-${idx}`}
         className="glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 min-w-[130px] w-[130px] flex-shrink-0"
       >
         <div
@@ -944,27 +941,14 @@ function PartnersMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
         <SectionHeader title={t.title} subtitle={t.subtitle} lang={lang} theme={theme} />
       </div>
 
-      {/* Row A — scrolls left */}
-      <div className="relative overflow-hidden mask-fade mb-4">
-        <motion.div
-          className="flex gap-4"
-          style={{ direction: "ltr", width: "max-content" }}
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 28, ease: "linear", repeat: Infinity, repeatType: "loop" }}
-        >
-          {rowA.map((p, i) => <Card key={`a-${p}-${i}`} p={p} i={i} />)}
-        </motion.div>
-      </div>
-
-      {/* Row B — scrolls right (offset) */}
       <div className="relative overflow-hidden mask-fade">
         <motion.div
           className="flex gap-4"
           style={{ direction: "ltr", width: "max-content" }}
-          animate={{ x: ["-50%", "0%"] }}
-          transition={{ duration: 32, ease: "linear", repeat: Infinity, repeatType: "loop" }}
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 30, ease: "linear", repeat: Infinity, repeatType: "loop" }}
         >
-          {rowB.map((p, i) => <Card key={`b-${p}-${i}`} p={p} i={i} />)}
+          {doubled.map((p, i) => <Card key={`${p}-${i}`} p={p} idx={i} />)}
         </motion.div>
       </div>
     </section>
