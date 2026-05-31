@@ -1,29 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import AbrajSite from "@/components/abraj/AbrajSite";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "ABRAJ ALMAS — Network, Computers, Cameras | شركة أبراج الماس" },
+      { name: "description", content: "ABRAJ ALMAS provides enterprise networking, CCTV, low-voltage systems, IT infrastructure, enterprise software, and technical consulting in Iraq since 2022." },
+      { property: "og:title", content: "ABRAJ ALMAS — Enterprise Technology & Network Solutions" },
+      { property: "og:description", content: "Networking, CCTV, low-voltage systems, enterprise software, IT equipment, and technical consulting. Book a consultation today." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return <AbrajSite />;
 }
