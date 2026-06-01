@@ -59,7 +59,17 @@ type Tab = "services" | "projects" | "partners" | "bookings";
    AdminPage
 ═══════════════════════════════════════════════════════════════ */
 function AdminPage() {
-  const [authed, setAuthed] = useState(isAuthed);
+  // Start as null to avoid SSR/client hydration mismatch (localStorage is client-only).
+  // On mount, we check the real auth state.
+  const [authed, setAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setAuthed(isAuthed());
+  }, []);
+
+  // Still hydrating — render nothing to avoid mismatch
+  if (authed === null) return null;
+
   if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
   return <Dashboard onLogout={() => { doLogout(); setAuthed(false); }} />;
 }
