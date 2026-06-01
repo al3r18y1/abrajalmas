@@ -1,12 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+// Fallback values used when the env file isn't loaded (e.g. dev server run from parent dir).
+// The publishable key is a public client key — safe to embed in source (like Firebase config).
+const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
+  ?? "https://hqhysilscrmfnovlpgvg.supabase.co";
+const key = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)
+  ?? "sb_publishable_1wYlYLWYNt-HEQzMTlk4ZQ_J9CqGgwu";
 
 export const isSupabaseConfigured =
   !!(url && key && url !== "YOUR_SUPABASE_URL" && key !== "YOUR_SUPABASE_ANON_KEY");
 
-export const supabase = isSupabaseConfigured ? createClient(url!, key!) : null;
+export const supabase = isSupabaseConfigured ? createClient(url, key) : null;
 
 /* ─── DB types ──────────────────────────────────────────────── */
 
