@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   Menu, X, Network, Wrench, Camera, Cpu, Cable, AppWindow, Compass, Wifi,
@@ -433,7 +433,7 @@ function LangToggle({
         }`}
         aria-label="العربية"
       >
-        <span className="text-base leading-none">🇸🇦</span>
+        <span className="text-base leading-none">🇮🇶</span>
       </button>
       {/* English — flag emoji */}
       <button
@@ -986,9 +986,9 @@ function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Them
                 <motion.div key={p.id} whileHover={{ scale: 1.06, y: -4 }} transition={{ duration: 0.2 }}
                   className={`glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 w-[130px] cursor-default ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/40")}`}>
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-12 h-12 rounded-2xl object-cover" />
+                    <img src={p.image_url} alt={p.name} className="w-20 h-20 rounded-2xl object-cover" />
                   ) : (
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black tracking-tight shrink-0 border transition-all duration-300"
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-lg font-black tracking-tight shrink-0 border transition-all duration-300"
                       style={{ background: p.bg_color, color: p.color, borderColor: `${p.color}40`, boxShadow: `0 0 12px ${p.color}22` }}>
                       {p.initials}
                     </div>
@@ -1001,7 +1001,7 @@ function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Them
                 return (
                   <motion.div key={p} whileHover={{ scale: 1.06, y: -4 }} transition={{ duration: 0.2 }}
                     className={`glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 w-[130px] cursor-default ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/40")}`}>
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black tracking-tight shrink-0 border transition-all duration-300"
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-lg font-black tracking-tight shrink-0 border transition-all duration-300"
                       style={{ background: meta.bg, color: meta.color, borderColor: `${meta.color}40`, boxShadow: `0 0 12px ${meta.color}22` }}>
                       {meta.initials}
                     </div>
