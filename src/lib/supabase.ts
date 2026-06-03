@@ -38,6 +38,12 @@ export interface DbProject {
   image_url: string | null;
   description_ar: string | null;
   description_en: string | null;
+  location_ar: string | null;
+  location_en: string | null;
+  gallery: string[] | null;
+  details_ar: string[] | null;
+  details_en: string[] | null;
+  featured: boolean;
   order_num: number;
   created_at: string;
   updated_at: string;

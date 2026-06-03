@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import {
   Menu, X, Network, Wrench, Camera, Cpu, Cable, AppWindow, Compass, Wifi,
   Phone, Mail, Globe, MapPin, MessageCircle, ChevronRight, Diamond,
@@ -117,7 +117,7 @@ export default function AbrajSite() {
         className={`${t.fontClass} ${theme === "day" ? "day-mode" : "night-mode"} transition-colors duration-500 ${tc(theme, "bg-black text-white", "bg-[#f7f8fb] text-[#111111]")} min-h-screen overflow-x-hidden pb-20 lg:pb-0`}
       >
         <Navbar lang={lang} setLang={handleSetLang} theme={theme} setTheme={setTheme} />
-        <Hero lang={lang} theme={theme} />
+        <Hero lang={lang} theme={theme} dynProjects={dynProjects} />
         <BrandDivider theme={theme} direction="left" />
         <AboutSection lang={lang} theme={theme} />
         <StatsStrip lang={lang} theme={theme} />
@@ -129,6 +129,7 @@ export default function AbrajSite() {
         <BrandDivider theme={theme} direction="left" />
         <ProjectsSection lang={lang} theme={theme} dynProjects={dynProjects} />
         <PartnersMarquee lang={lang} theme={theme} dynPartners={dynPartners} />
+        <HeroIntro lang={lang} theme={theme} />
         <BusinessSolutionsSection lang={lang} theme={theme} />
         <BrandDivider theme={theme} direction="right" />
         <ContactSection lang={lang} theme={theme} />
@@ -693,15 +694,11 @@ function QuickPreview({ lang, theme }: { lang: Lang; theme: Theme }) {
 }
 
 /* ---------------- Hero ---------------- */
-function Hero({ lang, theme }: { lang: Lang; theme: Theme }) {
+function Hero({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null }) {
   const t = translations[lang].hero;
   const heroStagger = { hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } };
   const labelAnim = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const, delay: 0.1 } } };
   const headlineAnim = { hidden: { opacity: 0, y: 24, filter: "blur(8px)" }, visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const, delay: 0.2 } } };
-  const paraAnim = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const, delay: 0.35 } } };
-  const buttonsAnim = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const, delay: 0.5 } } };
-  const badgesAnim = { hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.65 } } };
-  const badgeItem = { hidden: { opacity: 0, scale: 0.88 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" as const } } };
   return (
     <section id="home" className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <BackgroundFx theme={theme} />
@@ -742,12 +739,28 @@ function Hero({ lang, theme }: { lang: Lang; theme: Theme }) {
         </motion.div>
 
         {/* Marquees — full width, outside max-w-4xl but inside max-w-7xl */}
-        <ProjectsMarquee lang={lang} theme={theme} />
-        <FeaturedWorkMarquee lang={lang} theme={theme} />
         <ServicesMarquee lang={lang} theme={theme} />
+        <ProjectsMarquee lang={lang} theme={theme} dynProjects={dynProjects} />
+        <FeaturedWorkMarquee lang={lang} theme={theme} />
+      </div>
+    </section>
+  );
+}
 
-        <motion.div variants={heroStagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
-          <motion.p variants={paraAnim} className={`mt-6 text-base sm:text-lg max-w-3xl mx-auto ${tc(theme, "text-[#e9e9e9]/85", "text-[#3d4451]")}` }>
+/* ---------------- Hero intro block (moved below the partners section) ---------------- */
+function HeroIntro({ lang, theme }: { lang: Lang; theme: Theme }) {
+  const t = translations[lang].hero;
+  const container = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } } };
+  const paraAnim = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } } };
+  const buttonsAnim = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const } } };
+  const badgesAnim = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
+  const badgeItem = { hidden: { opacity: 0, scale: 0.88 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" as const } } };
+
+  return (
+    <section className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="max-w-7xl mx-auto relative">
+        <motion.div variants={container} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} className="text-center max-w-4xl mx-auto">
+          <motion.p variants={paraAnim} className={`text-base sm:text-lg max-w-3xl mx-auto ${tc(theme, "text-[#e9e9e9]/85", "text-[#3d4451]")}` }>
             {t.sub}
           </motion.p>
           <motion.p variants={paraAnim} className={`mt-4 text-sm sm:text-base max-w-3xl mx-auto leading-relaxed ${tc(theme, "text-[#e9e9e9]/60", "text-[#5b6472]")}` }>
@@ -790,7 +803,9 @@ const FEATURED_PROJECT_IMAGES = [
 ];
 
 /* ---------------- Featured Projects — seamless infinite marquee ---------------- */
-function ProjectsMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
+type MarqueeProject = { id: string | null; src: string; label: string };
+
+function ProjectsMarquee({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null }) {
   const isAr = lang === "ar";
   const [brokenImages, setBrokenImages] = useState<Record<number, boolean>>({});
   const title = isAr ? "أبرز مشاريعنا" : "Our Featured Projects";
@@ -798,8 +813,24 @@ function ProjectsMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
     ? "لمحة عن مشاريع نفخر بإنجازها في مجال الشبكات والتقنية"
     : "A glimpse of the networking & technology projects we are proud of";
 
+  // DB-driven: featured projects link to their detail page. Falls back to the
+  // static 18-image set (no link) only when the database isn't reachable.
+  const featured = (dynProjects || []).filter((p) => p.featured && p.image_url);
+  const base: MarqueeProject[] =
+    featured.length > 0
+      ? featured.map((p) => ({
+          id: p.id,
+          src: p.image_url as string,
+          label: isAr ? p.title_ar : p.title_en || p.title_ar,
+        }))
+      : FEATURED_PROJECT_IMAGES.map((src) => ({
+          id: null,
+          src,
+          label: isAr ? "مشروع منجز من أبراج الماس" : "ABRAJ ALMAS completed project",
+        }));
+
   // Duplicate the set twice so the -50% translate loops seamlessly with no gap.
-  const cards = [...FEATURED_PROJECT_IMAGES, ...FEATURED_PROJECT_IMAGES];
+  const cards = [...base, ...base];
 
   // Glassmorphism card styling adapts to the active theme.
   const cardStyle: React.CSSProperties =
@@ -841,23 +872,23 @@ function ProjectsMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
       {/* Marquee viewport — pause on hover handled in CSS via .proj-marquee:hover */}
       <div className={`proj-marquee relative w-full overflow-hidden py-4 rounded-2xl ${tc(theme, "bg-white/[0.02]", "bg-[#1d3fba]/[0.03]")}`}>
         <div className={`proj-marquee-track ${isAr ? "is-rtl" : ""}`}>
-          {cards.map((_, i) => {
-            const baseIndex = i % FEATURED_PROJECT_IMAGES.length;
+          {cards.map((card, i) => {
+            const baseIndex = i % base.length;
             const isBroken = !!brokenImages[baseIndex];
-            const src = FEATURED_PROJECT_IMAGES[baseIndex];
+            const href = card.id ? `/projects/${card.id}` : "#projects";
 
             return (
             <a
               key={i}
-              href="#projects"
-              aria-hidden={i >= FEATURED_PROJECT_IMAGES.length}
+              href={href}
+              aria-hidden={i >= base.length}
               className="group relative shrink-0 mr-5 w-[260px] sm:w-[320px] lg:w-[360px] rounded-2xl overflow-hidden p-2 transition-transform duration-300 hover:scale-[1.03] cursor-pointer"
               style={cardStyle}
             >
               <div className="relative w-full h-40 sm:h-48 lg:h-56 rounded-xl overflow-hidden">
                 <img
-                  src={src}
-                  alt={isAr ? "مشروع منجز من أبراج الماس" : "ABRAJ ALMAS completed project"}
+                  src={card.src}
+                  alt={card.label}
                   loading="lazy"
                   draggable={false}
                   onError={() => setBrokenImages((prev) => ({ ...prev, [baseIndex]: true }))}
@@ -869,8 +900,14 @@ function ProjectsMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
                   </div>
                 )}
                 <div
-                  className={`absolute inset-0 pointer-events-none bg-gradient-to-t ${tc(theme, "from-black/40 via-transparent to-transparent", "from-white/30 via-transparent to-transparent")}`}
+                  className={`absolute inset-0 pointer-events-none bg-gradient-to-t ${tc(theme, "from-black/55 via-black/10 to-transparent", "from-black/35 via-transparent to-transparent")}`}
                 />
+                {/* Project name overlay (DB-driven cards only) */}
+                {card.id && (
+                  <div className="absolute inset-x-0 bottom-0 p-3">
+                    <span className="text-white text-sm font-bold drop-shadow-lg line-clamp-1">{card.label}</span>
+                  </div>
+                )}
               </div>
             </a>
           )})}
@@ -1023,7 +1060,7 @@ function ServicesMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
               return (
                 <a
                   key={`${service}-${i}`}
-                  href="/booking"
+                  href="#services"
                   aria-hidden={i >= serviceTitles.length}
                   className="group relative shrink-0 mr-5 w-[280px] sm:w-[330px] lg:w-[380px] rounded-2xl overflow-hidden p-5 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(29,63,186,0.35)] cursor-pointer"
                   style={cardStyle}
@@ -1354,6 +1391,18 @@ function ServicesSection({ lang, theme, dynServices }: { lang: Lang; theme: Them
   const t = translations[lang].services;
   const isAr = lang === "ar";
 
+  // Reveal the grid reliably — even when the user jumps straight here via the
+  // #services anchor (where whileInView can fail to fire). A short mount-fallback
+  // guarantees the cards are never left invisible.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(gridRef, { once: true, amount: 0.1 });
+  const [forceShow, setForceShow] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setForceShow(true), 600);
+    return () => clearTimeout(id);
+  }, []);
+  const reveal = inView || forceShow;
+
   // Build display items: prefer DB data, fall back to static
   const displayItems = dynServices
     ? dynServices.map((s, i) => ({
@@ -1371,7 +1420,7 @@ function ServicesSection({ lang, theme, dynServices }: { lang: Lang; theme: Them
       <ParallaxBg theme={theme} />
       <div className="max-w-7xl mx-auto">
         <SectionHeader title={t.title} subtitle={t.subtitle} lang={lang} theme={theme} />
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <motion.div ref={gridRef} initial="hidden" animate={reveal ? "visible" : "hidden"} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {displayItems.map((s) => {
             const Icon = SERVICE_ICONS[s.i] || Network;
             return (
@@ -1580,8 +1629,38 @@ function BusinessSolutionsSection({ lang, theme }: { lang: Lang; theme: Theme })
 /* ---------------- Contact ---------------- */
 function ContactSection({ lang, theme }: { lang: Lang; theme: Theme }) {
   const t = translations[lang].contact;
+  const isAr = lang === "ar";
   const services = translations[lang].booking.services;
   const waLink = `https://wa.me/${WA_NUMBER}`;
+
+  const [cForm, setCForm] = useState({ fullName: "", company: "", phone: "", email: "", service: "", message: "" });
+  const setC = (k: keyof typeof cForm, v: string) => setCForm((p) => ({ ...p, [k]: v }));
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lines = isAr
+      ? [
+          "مرحباً شركة أبراج الماس،",
+          cForm.fullName && `الاسم: ${cForm.fullName}`,
+          cForm.company && `الشركة: ${cForm.company}`,
+          cForm.phone && `الهاتف: ${cForm.phone}`,
+          cForm.email && `البريد الإلكتروني: ${cForm.email}`,
+          cForm.service && `الخدمة المطلوبة: ${cForm.service}`,
+          cForm.message && `الرسالة: ${cForm.message}`,
+        ]
+      : [
+          "Hello ABRAJ ALMAS,",
+          cForm.fullName && `Name: ${cForm.fullName}`,
+          cForm.company && `Company: ${cForm.company}`,
+          cForm.phone && `Phone: ${cForm.phone}`,
+          cForm.email && `Email: ${cForm.email}`,
+          cForm.service && `Required Service: ${cForm.service}`,
+          cForm.message && `Message: ${cForm.message}`,
+        ];
+    const text = lines.filter(Boolean).join("\n");
+    window.open(`${waLink}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  };
+
   return (
     <section id="contact" className="relative py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -1609,23 +1688,23 @@ function ContactSection({ lang, theme }: { lang: Lang; theme: Theme }) {
               </a>
             </div>
           </div>
-          <form className="lg:col-span-3 glass-card blue-glow p-6 sm:p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); alert(lang === "ar" ? "تم إرسال الرسالة" : "Message sent"); }}>
+          <form className="lg:col-span-3 glass-card blue-glow p-6 sm:p-8 space-y-4" onSubmit={handleContactSubmit}>
             <div className="grid sm:grid-cols-2 gap-4">
-              <InputField label={t.labels.fullName} required theme={theme} />
-              <InputField label={t.labels.company} theme={theme} />
-              <InputField label={t.labels.phone} type="tel" theme={theme} />
-              <InputField label={t.labels.email} type="email" theme={theme} />
+              <InputField label={t.labels.fullName} required theme={theme} value={cForm.fullName} onChange={(v) => setC("fullName", v)} />
+              <InputField label={t.labels.company} theme={theme} value={cForm.company} onChange={(v) => setC("company", v)} />
+              <InputField label={t.labels.phone} type="tel" theme={theme} value={cForm.phone} onChange={(v) => setC("phone", v)} />
+              <InputField label={t.labels.email} type="email" theme={theme} value={cForm.email} onChange={(v) => setC("email", v)} />
             </div>
             <label className="block">
               <span className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${tc(theme, "text-white/70", "text-[#3d4451]")}` }>{t.labels.service}</span>
-              <select className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white [&>option]:bg-black", "bg-white border-[#1d3fba]/15 text-[#111111] [&>option]:bg-white")}` }>
+              <select value={cForm.service} onChange={(e) => setC("service", e.target.value)} className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white [&>option]:bg-black", "bg-white border-[#1d3fba]/15 text-[#111111] [&>option]:bg-white")}` }>
                 <option value="">—</option>
                 {services.map((s) => <option key={s}>{s}</option>)}
               </select>
             </label>
             <label className="block">
               <span className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${tc(theme, "text-white/70", "text-[#3d4451]")}` }>{t.labels.message}</span>
-              <textarea rows={5} className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white", "bg-white border-[#1d3fba]/15 text-[#111111]")}` } />
+              <textarea rows={5} value={cForm.message} onChange={(e) => setC("message", e.target.value)} className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white", "bg-white border-[#1d3fba]/15 text-[#111111]")}` } />
             </label>
             <button type="submit" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#1d3fba] text-white font-bold hover:brightness-110 blue-glow">
               {t.labels.send} <ChevronRight className="w-4 h-4" />
@@ -1652,11 +1731,11 @@ function ContactCard({ icon: Icon, title, value, href, theme }: { icon: any; tit
   );
 }
 
-function InputField({ label, type = "text", required, theme }: { label: string; type?: string; required?: boolean; theme: Theme }) {
+function InputField({ label, type = "text", required, theme, value, onChange }: { label: string; type?: string; required?: boolean; theme: Theme; value?: string; onChange?: (v: string) => void }) {
   return (
     <label className="block">
       <span className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${tc(theme, "text-white/70", "text-[#3d4451]")}` }>{label}</span>
-      <input type={type} required={required} className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white", "bg-white border-[#1d3fba]/15 text-[#111111]")}` } />
+      <input type={type} required={required} value={value} onChange={onChange ? (e) => onChange(e.target.value) : undefined} className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1d3fba] ${tc(theme, "bg-white/[0.03] border-white/10 text-white", "bg-white border-[#1d3fba]/15 text-[#111111]")}` } />
     </label>
   );
 }

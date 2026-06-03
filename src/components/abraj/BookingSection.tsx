@@ -46,11 +46,29 @@ const initialData: BookingData = {
   preferredContactMethod: "",
 };
 
-export function BookingSection({ lang, theme, standalone = false }: { lang: Lang; theme: Theme; standalone?: boolean }) {
+export function BookingSection({ lang, theme, standalone = false, initialService, initialNote }: { lang: Lang; theme: Theme; standalone?: boolean; initialService?: string; initialNote?: string }) {
   const t = translations[lang].booking;
   const isAr = lang === "ar";
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<BookingData>(initialData);
+  const [data, setData] = useState<BookingData>(() => {
+    if (!initialService && !initialNote) return initialData;
+    // Match the incoming service against the known list (substring, both directions);
+    // fall back to the "Other Service" option so step-1 validation passes.
+    const list = translations[lang].booking.services;
+    let matched: string | undefined;
+    if (initialService) {
+      const needle = initialService.trim().toLowerCase();
+      matched = list.find(
+        (s) => s.toLowerCase().includes(needle) || needle.includes(s.toLowerCase())
+      );
+      if (!matched) matched = list[list.length - 1]; // "خدمة أخرى" / "Other Service"
+    }
+    return {
+      ...initialData,
+      selectedServices: matched ? [matched] : [],
+      projectDescription: initialNote || "",
+    };
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const topRef = useRef<HTMLElement>(null);
 
@@ -223,7 +241,7 @@ export function BookingSection({ lang, theme, standalone = false }: { lang: Lang
                             >
                               {selected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                             </div>
-                            <span className={`font-medium ${selected ? "text-white" : tc(theme, "text-[#e9e9e9]", "text-[#111111]")}`}>{s}</span>
+                            <span className={`font-medium ${selected ? tc(theme, "text-white", "text-[#1d3fba]") : tc(theme, "text-[#e9e9e9]", "text-[#111111]")}`}>{s}</span>
                           </div>
                         </button>
                       );
@@ -309,7 +327,7 @@ export function BookingSection({ lang, theme, standalone = false }: { lang: Lang
                               onClick={() => update("preferredContactMethod", m)}
                               className={`px-5 py-2.5 rounded-full border text-sm transition-all ${
                                 data.preferredContactMethod === m
-                                  ? "border-[#1d3fba] bg-[#1d3fba]/20 text-white"
+                                  ? tc(theme, "border-[#1d3fba] bg-[#1d3fba]/20 text-white", "border-[#1d3fba] bg-[#1d3fba] text-white")
                                   : tc(theme, "border-white/10 bg-white/[0.03] text-[#e9e9e9] hover:border-white/25", "border-[#1d3fba]/15 bg-white/60 text-[#111111] hover:border-[#1d3fba]/40")
                               }`}
                             >
@@ -330,7 +348,7 @@ export function BookingSection({ lang, theme, standalone = false }: { lang: Lang
                     <ReviewBlock label={t.labels.selected}>
                       <div className="flex flex-wrap gap-2">
                         {data.selectedServices.map((s) => (
-                          <span key={s} className="px-3 py-1 text-xs rounded-full bg-[#1d3fba]/20 border border-[#1d3fba]/40 text-white">{s}</span>
+                          <span key={s} className={`px-3 py-1 text-xs rounded-full border border-[#1d3fba]/40 ${tc(theme, "bg-[#1d3fba]/20 text-white", "bg-[#1d3fba]/10 text-[#1d3fba]")}`}>{s}</span>
                         ))}
                       </div>
                     </ReviewBlock>
@@ -365,7 +383,7 @@ export function BookingSection({ lang, theme, standalone = false }: { lang: Lang
                   <h3 className={`text-2xl sm:text-3xl font-extrabold mb-3 ${tc(theme, "text-white", "text-[#111111]")}` }>{t.success.title}</h3>
                   <p className={`max-w-lg mx-auto mb-8 ${tc(theme, "text-[#e9e9e9]/80", "text-[#3d4451]")}` }>{t.success.message}</p>
                   <div className="flex flex-wrap justify-center gap-3">
-                    <button onClick={reset} className={`px-5 py-2.5 rounded-full border ${tc(theme, "bg-white/[0.05] border-white/15 text-white hover:bg-white/10", "bg-white/80 border-[#1d3fba]/15 text-[#111111] hover:bg-white")}` }>{t.success.backHome}</button>
+                    <a href="/" className={`px-5 py-2.5 rounded-full border ${tc(theme, "bg-white/[0.05] border-white/15 text-white hover:bg-white/10", "bg-white/80 border-[#1d3fba]/15 text-[#111111] hover:bg-white")}` }>{t.success.backHome}</a>
                     <button onClick={reset} className="px-5 py-2.5 rounded-full bg-[#1d3fba] text-white hover:brightness-110">{t.success.another}</button>
                     <a href={buildWa()} target="_blank" rel="noreferrer" className="px-5 py-2.5 rounded-full bg-[#1d3fba] text-white font-semibold hover:brightness-110 inline-flex items-center gap-2">
                       <MessageCircle className="w-4 h-4" />{t.success.contactWa}

@@ -391,8 +391,11 @@ type ProjectForm = {
   title_ar: string; title_en: string;
   category: string; description_ar: string; description_en: string;
   image_url: string; order_num: number;
+  location_ar: string; location_en: string;
+  details_ar: string; details_en: string;
+  gallery: string[]; featured: boolean;
 };
-const emptyProject = (): ProjectForm => ({ title_ar: "", title_en: "", category: "", description_ar: "", description_en: "", image_url: "", order_num: 0 });
+const emptyProject = (): ProjectForm => ({ title_ar: "", title_en: "", category: "", description_ar: "", description_en: "", image_url: "", order_num: 0, location_ar: "", location_en: "", details_ar: "", details_en: "", gallery: [], featured: true });
 
 function ProjectsTab({ toast }: { toast: Toast }) {
   const [items, setItems] = useState<DbProject[]>([]);
@@ -496,15 +499,21 @@ function ProjectModal({ editing, onClose, onSaved, toast }: {
       category: editing.category || "", image_url: editing.image_url || "",
       description_ar: editing.description_ar || "", description_en: editing.description_en || "",
       order_num: editing.order_num,
+      location_ar: editing.location_ar || "", location_en: editing.location_en || "",
+      details_ar: (editing.details_ar || []).join("\n"),
+      details_en: (editing.details_en || []).join("\n"),
+      gallery: editing.gallery || [],
+      featured: editing.featured ?? true,
     } : emptyProject()
   );
   const [saving, setSaving] = useState(false);
-  const set = (k: keyof ProjectForm, v: string | number) => setForm(p => ({ ...p, [k]: v }));
+  const set = <K extends keyof ProjectForm>(k: K, v: ProjectForm[K]) => setForm(p => ({ ...p, [k]: v }));
 
   const save = async () => {
     if (!form.title_ar.trim()) { toast.err("اسم المشروع بالعربي مطلوب"); return; }
     if (!supabase) { toast.err("Supabase غير مهيأ"); return; }
     setSaving(true);
+    const toLines = (s: string) => s.split("\n").map(l => l.trim()).filter(Boolean);
     const payload = {
       title_ar: form.title_ar.trim(), title_en: form.title_en.trim(),
       category: form.category.trim() || null,
@@ -512,6 +521,12 @@ function ProjectModal({ editing, onClose, onSaved, toast }: {
       description_ar: form.description_ar.trim() || null,
       description_en: form.description_en.trim() || null,
       order_num: Number(form.order_num),
+      location_ar: form.location_ar.trim() || null,
+      location_en: form.location_en.trim() || null,
+      details_ar: toLines(form.details_ar),
+      details_en: toLines(form.details_en),
+      gallery: form.gallery,
+      featured: form.featured,
     };
     let result;
     if (editing) {
@@ -531,9 +546,13 @@ function ProjectModal({ editing, onClose, onSaved, toast }: {
         <Field label="اسم المشروع بالإنجليزي"><Input value={form.title_en} onChange={v => set("title_en", v)} dir="ltr" /></Field>
         <Field label="الفئة"><Input value={form.category} onChange={v => set("category", v)} placeholder="شبكات / كاميرات / بنية تحتية" /></Field>
         <Field label="الترتيب"><Input value={String(form.order_num)} onChange={v => set("order_num", Number(v))} type="number" /></Field>
+        <Field label="الموقع بالعربي"><Input value={form.location_ar} onChange={v => set("location_ar", v)} placeholder="مثال: بغداد - المنصور" /></Field>
+        <Field label="الموقع بالإنجليزي"><Input value={form.location_en} onChange={v => set("location_en", v)} dir="ltr" placeholder="e.g. Baghdad - Mansour" /></Field>
         <Field label="الوصف بالعربي" full><Textarea value={form.description_ar} onChange={v => set("description_ar", v)} rows={2} /></Field>
         <Field label="الوصف بالإنجليزي" full><Textarea value={form.description_en} onChange={v => set("description_en", v)} rows={2} dir="ltr" /></Field>
-        <Field label="صورة المشروع (1200×675 — نسبة 16:9)" full>
+        <Field label="نقاط التفاصيل بالعربي (نقطة في كل سطر)" full><Textarea value={form.details_ar} onChange={v => set("details_ar", v)} rows={4} placeholder={"تركيب 120 كاميرا مراقبة\nشبكة ألياف ضوئية بطول 5 كم\n..."} /></Field>
+        <Field label="نقاط التفاصيل بالإنجليزي (نقطة في كل سطر)" full><Textarea value={form.details_en} onChange={v => set("details_en", v)} rows={4} dir="ltr" placeholder={"120 CCTV cameras installed\n5 km fiber-optic network\n..."} /></Field>
+        <Field label="صورة المشروع الرئيسية (1200×675 — نسبة 16:9)" full>
           <ImageUploadField
             value={form.image_url || null}
             onChange={url => set("image_url", url ?? "")}
@@ -541,6 +560,56 @@ function ProjectModal({ editing, onClose, onSaved, toast }: {
             toast={toast}
           />
         </Field>
+        <Field label="معرض صور إضافية" full>
+          <GalleryUploadField
+            value={form.gallery}
+            onChange={g => set("gallery", g)}
+            toast={toast}
+          />
+        </Field>
+        <Field label="الظهور في شريط «أبرز مشاريعنا»" full>
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <button
+              type="button"
+              onClick={() => set("featured", !form.featured)}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.featured ? "bg-[#1d3fba]" : "bg-white/15"}`}
+              aria-pressed={form.featured}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${form.featured ? "start-5" : "start-0.5"}`} />
+            </button>
+            <span className="text-sm text-white/70">{form.featured ? "يظهر في الشريط" : "مخفي من الشريط"}</span>
+          </label>
+        </Field>
+        {editing && (
+          <Field label="رابط صفحة المشروع" full>
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/projects/${editing.id}`}
+                dir="ltr"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/70 outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(`${window.location.origin}/projects/${editing.id}`);
+                  toast.ok("تم نسخ الرابط");
+                }}
+                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs transition-colors"
+              >
+                نسخ
+              </button>
+              <a
+                href={`/projects/${editing.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs transition-colors"
+              >
+                فتح
+              </a>
+            </div>
+          </Field>
+        )}
       </div>
       <ModalFooter onClose={onClose} onSave={save} saving={saving} />
     </Modal>
@@ -951,6 +1020,70 @@ function ImageUploadField({ value, onChange, maxW, maxH, square, bucket, toast }
       <p className="text-[10px] text-white/25">
         الصورة ستُقلَّص تلقائياً إلى {maxW}×{maxH}{square ? " (مربع)" : ""} بصيغة WebP
       </p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED: GalleryUploadField — multi-image uploader
+═══════════════════════════════════════════════════════════════ */
+function GalleryUploadField({ value, onChange, toast }: {
+  value: string[]; onChange: (urls: string[]) => void; toast: Toast;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    const uploaded: string[] = [];
+    try {
+      for (const file of files) {
+        const blob = await resizeImage(file, 1200, 900, false);
+        const path = `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+        let url: string;
+        if (isSupabaseConfigured && supabase) {
+          url = await uploadImage(blob, "projects-images", path);
+        } else {
+          url = URL.createObjectURL(blob);
+        }
+        uploaded.push(url);
+      }
+      onChange([...value, ...uploaded]);
+    } catch (err) {
+      console.error(err);
+      toast.err("فشل رفع بعض الصور");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const removeAt = (i: number) => onChange(value.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-2">
+      {value.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          {value.map((url, i) => (
+            <div key={i} className="relative">
+              <img src={url} alt="" className="w-full h-20 object-cover rounded-lg border border-white/10" />
+              <button onClick={() => removeAt(i)}
+                className="absolute -top-2 -start-2 w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center text-xs hover:bg-red-500">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm text-white/70 transition-colors disabled:opacity-50">
+        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        {uploading ? "جاري الرفع..." : "إضافة صور للمعرض"}
+      </button>
+      <input ref={inputRef} type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
+      <p className="text-[10px] text-white/25">يمكن اختيار عدة صور دفعة واحدة — تُقلَّص إلى 1200×900 بصيغة WebP</p>
     </div>
   );
 }

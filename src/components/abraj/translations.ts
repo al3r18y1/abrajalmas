@@ -17,7 +17,7 @@ export const translations = {
     },
     hero: {
       label: "حلول تكنولوجيا وشبكات للمؤسسات والأعمال",
-      title: "الدقة في كل اتصال",
+      title: "نوظف التكنولوجيا الذكية، لأعمال أكثر استقراراً",
       sub: "حلول متقدمة في الشبكات، البنية التحتية الرقمية، أنظمة المراقبة، أنظمة الجهد المنخفض، البرامج الإدارية، وتجهيزات الحاسوب منذ عام 2022.",
       para: "تدعم شركة أبراج الماس الأفراد والشركات بأحدث خدمات تكنولوجيا المعلومات والبنية التحتية الرقمية، من التخطيط والاستشارة إلى التجهيز والتركيب والصيانة، مع الالتزام بالجودة والموثوقية وسرعة التنفيذ.",
       primary: "احجز استشارة تقنية",
@@ -70,7 +70,7 @@ export const translations = {
         { title: "برامج إدارة المؤسسات", desc: "نوفر حلولاً برمجية لإدارة الأعمال تشمل المحاسبة، الموارد البشرية، الحضور والانصراف، المخزون، نقاط البيع، وإدارة المشاريع.", features: ["برامج المحاسبة","برامج الموارد البشرية","الحضور والانصراف","إدارة المخزون","نقاط البيع POS","إدارة المشاريع"] },
         { title: "الاستشارات التقنية", desc: "نقدم استشارات تقنية احترافية لمساعدة العملاء على تطوير أعمالهم، اختيار الحلول المناسبة، تحسين البنية التحتية، ومواكبة التحول الرقمي.", features: ["تخطيط البنية التحتية","استشارات تقنية","استراتيجية تطوير الأنظمة","تحسين إجراءات العمل","توصيات الأمان","خارطة طريق تقنية"] },
         { title: "الاتصال بالإنترنت والدعم الفني", desc: "نقدم خدمات إعداد الاتصال بالإنترنت، تحسين التغطية، تجهيز نقاط الوصول، اختبار الأداء، ومعالجة المشاكل الفنية لضمان استقرار التشغيل.", features: ["إعداد الاتصال بالإنترنت","نقاط الوصول","تخطيط تغطية Wi-Fi","اختبار الأداء","دعم فني","معالجة الأعطال الميدانية"] },
-        { title: "البيت الذكي والمؤسسات الذكية", desc: "حوّل منزلك او مؤسستك إلى بيئة ذكية متكاملة تمنحك الراحة والأمان والتحكم الكامل. في ادارة المنزل من الإضاءة والتكييف وأنظمة المراقبة والأجهزة المنزلية بسهولة عبر الهاتف الذكي أو الأوامر الصوتية أو الشاشات الذكية، مع إمكانية إنشاء سيناريوهات مخصصة تناسب أسلوب حياتك وتساعد على ترشيد استهلاك الطاقة ومناسبة للاستخدام اليومي.", features: ["التحكم بالإضاءة والتكييف","أنظمة المراقبة الذكية","التحكم عبر الهاتف الذكي","الأوامر الصوتية والشاشات الذكية","سيناريوهات مخصصة","ترشيد استهلاك الطاقة"] },
+        { title: "البيت الذكي والمؤسسات الذكية", desc: "حوّل منزلك أو مؤسستك إلى بيئة ذكية متكاملة تمنحك الراحة والأمان والتحكم الكامل في إدارة المنزل، من الإضاءة والتكييف وأنظمة المراقبة والأجهزة المنزلية بسهولة عبر الهاتف الذكي أو الأوامر الصوتية أو الشاشات الذكية، مع إمكانية إنشاء سيناريوهات مخصصة تناسب أسلوب حياتك وتساعد على ترشيد استهلاك الطاقة، ومناسبة للاستخدام اليومي.", features: ["التحكم بالإضاءة والتكييف","أنظمة المراقبة الذكية","التحكم عبر الهاتف الذكي","الأوامر الصوتية والشاشات الذكية","سيناريوهات مخصصة","ترشيد استهلاك الطاقة"] },
       ],
     },
     process: {
@@ -305,7 +305,7 @@ ${d.message ? 'رسالة إضافية:\n' + d.message : ''}`,
     },
     hero: {
       label: "Enterprise Technology & Network Solutions",
-      title: "Precision in Every Connection.",
+      title: "Smart Technology for More Stable Operations",
       sub: "Advanced solutions in networking, digital infrastructure, CCTV, low-voltage systems, enterprise software, and IT equipment since 2022.",
       para: "ABRAJ ALMAS supports individuals and businesses with modern IT and digital infrastructure services, from planning and consulting to supply, installation, maintenance, and support, with a focus on quality, reliability, and fast execution.",
       primary: "Book a Technical Consultation",
@@ -537,7 +537,7 @@ ${d.message ? 'Additional Message:\n' + d.message : ''}`,
       status: "Completed Project",
       categories: ["Network","CCTV","IT Infrastructure","Technical Systems"],
       items: [
-        "Ministry of Foreign Affairs","Baghdad Residences - Green Zone","Qasir AlSham","Palm Towers","Al-Nakheel Mall","HOD","EISB","Tajdid Village","The Scientific Source","Additional Project",
+        "Ministry of Foreign Affairs","Baghdad Residences - Green Zone","Qasr Al-Sham","Palm Towers","Al-Nakheel Mall","HOD","EISB","Tajdid Village","The Scientific Source","Additional Project",
       ],
     },
     partners: {

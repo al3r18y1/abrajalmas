@@ -7,7 +7,13 @@ import type { Theme } from "@/components/abraj/AbrajSite";
 import logoWhite from "@/assets/abraj-logo-white.png";
 import logoBlack from "@/assets/abraj-logo-black.png";
 
+type BookingSearch = { service?: string; note?: string };
+
 export const Route = createFileRoute("/booking")({
+  validateSearch: (search: Record<string, unknown>): BookingSearch => ({
+    service: typeof search.service === "string" ? search.service : undefined,
+    note: typeof search.note === "string" ? search.note : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "حجز استشارة — أبراج الماس | Book a Consultation — ABRAJ ALMAS" },
@@ -21,6 +27,7 @@ const tc = (theme: Theme, night: string, day: string) =>
   theme === "night" ? night : day;
 
 function BookingPage() {
+  const { service: initialService, note: initialNote } = Route.useSearch();
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("abraj-theme");
@@ -110,7 +117,7 @@ function BookingPage() {
         </div>
       </header>
 
-      <BookingSection lang={lang} theme={theme} standalone />
+      <BookingSection lang={lang} theme={theme} standalone initialService={initialService} initialNote={initialNote} />
 
       {/* ── Mobile App Bottom Nav ── */}
       <nav
@@ -133,10 +140,10 @@ function BookingPage() {
                 <span className="text-[9px] mt-0.5 font-bold text-[#1d3fba]">{label}</span>
               </span>
             ) : (
-              <Link key={id} to={href as "/" | "/booking"} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors active:scale-95 ${tc(theme, "text-white/40 hover:text-white", "text-[#8a95a8] hover:text-[#1d3fba]")}`}>
+              <a key={id} href={href} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors active:scale-95 ${tc(theme, "text-white/40 hover:text-white", "text-[#8a95a8] hover:text-[#1d3fba]")}`}>
                 <Icon className="w-5 h-5" />
                 <span className="text-[9px] font-medium">{label}</span>
-              </Link>
+              </a>
             )
           )}
         </div>

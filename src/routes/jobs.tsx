@@ -609,10 +609,10 @@ function JobsPage() {
                 <span className="text-[9px] mt-0.5 font-bold text-[#1d3fba]">{label}</span>
               </span>
             ) : (
-              <Link key={id} to={href as "/" | "/booking" | "/jobs"} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors active:scale-95 ${tc(theme, "text-white/40 hover:text-white", "text-[#8a95a8] hover:text-[#1d3fba]")}`}>
+              <a key={id} href={href} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors active:scale-95 ${tc(theme, "text-white/40 hover:text-white", "text-[#8a95a8] hover:text-[#1d3fba]")}`}>
                 <Icon className="w-5 h-5" />
                 <span className="text-[9px] font-medium">{label}</span>
-              </Link>
+              </a>
             )
           )}
         </div>
