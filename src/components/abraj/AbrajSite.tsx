@@ -127,9 +127,6 @@ export default function AbrajSite() {
         <ServicesSection lang={lang} theme={theme} dynServices={dynServices} />
         <ProcessSection lang={lang} theme={theme} />
         <BrandDivider theme={theme} direction="left" />
-        <ProjectsSection lang={lang} theme={theme} dynProjects={dynProjects} />
-        <PartnersMarquee lang={lang} theme={theme} dynPartners={dynPartners} />
-        <HeroIntro lang={lang} theme={theme} />
         <BusinessSolutionsSection lang={lang} theme={theme} />
         <BrandDivider theme={theme} direction="right" />
         <ContactSection lang={lang} theme={theme} />
@@ -145,7 +142,7 @@ export default function AbrajSite() {
               { id: "home",     icon: HomeIcon,      label: isAr ? "الرئيسية" : "Home",     href: "#home",     cta: false },
               { id: "services", icon: AppWindow,     label: isAr ? "الخدمات"  : "Services", href: "#services", cta: false },
               { id: "booking",  icon: Sparkles,      label: isAr ? "احجز"     : "Book",     href: "/booking", cta: true  },
-              { id: "projects", icon: Building2,     label: isAr ? "المشاريع" : "Projects", href: "#projects", cta: false },
+              { id: "projects", icon: Building2,     label: isAr ? "المشاريع" : "Projects", href: "/projects", cta: false },
               { id: "contact",  icon: MessageCircle, label: isAr ? "تواصل"    : "Contact",  href: "#contact",  cta: false },
             ] as const).map(({ id, icon: Icon, label, href, cta }) =>
               cta ? (
@@ -311,7 +308,7 @@ function ThemeToggle({
 }
 
 /* ---------------- Navbar ---------------- */
-function Navbar({
+export function Navbar({
   lang,
   setLang,
   theme,
@@ -371,7 +368,7 @@ function Navbar({
 
         <nav className="hidden lg:flex items-center gap-1">
           {links.map((l) => (
-            <a key={l.id} href={l.id === "booking" ? "/booking" : l.id === "jobs" ? "/jobs" : `#${l.id}`} className={`px-3 py-2 text-sm font-medium transition-colors hover:text-[#1d3fba] ${tc(theme, "text-white hover:text-[#4d7aff]", "text-[#3d4451]")}`} style={theme === "night" ? { textShadow: "0 1px 3px rgba(0,0,0,0.5)" } : {}}>{l.label}</a>
+            <a key={l.id} href={l.id === "booking" ? "/booking" : l.id === "jobs" ? "/jobs" : l.id === "projects" ? "/projects" : l.id === "partners" ? "/partners" : `#${l.id}`} className={`px-3 py-2 text-sm font-medium transition-colors hover:text-[#1d3fba] ${tc(theme, "text-white hover:text-[#4d7aff]", "text-[#3d4451]")}`} style={theme === "night" ? { textShadow: "0 1px 3px rgba(0,0,0,0.5)" } : {}}>{l.label}</a>
           ))}
         </nav>
 
@@ -403,7 +400,7 @@ function Navbar({
           >
             <div className="px-4 py-4 flex flex-col gap-1">
               {links.map((l) => (
-                <a key={l.id} href={l.id === "booking" ? "/booking" : l.id === "jobs" ? "/jobs" : `#${l.id}`} onClick={() => setOpen(false)} className={`py-2.5 px-3 rounded-lg font-medium transition-colors ${tc(theme, "text-white hover:bg-white/5", "text-[#3d4451] hover:bg-[#1d3fba]/5")}`}>{l.label}</a>
+                <a key={l.id} href={l.id === "booking" ? "/booking" : l.id === "jobs" ? "/jobs" : l.id === "projects" ? "/projects" : l.id === "partners" ? "/partners" : `#${l.id}`} onClick={() => setOpen(false)} className={`py-2.5 px-3 rounded-lg font-medium transition-colors ${tc(theme, "text-white hover:bg-white/5", "text-[#3d4451] hover:bg-[#1d3fba]/5")}`}>{l.label}</a>
               ))}
               <div className="flex items-center gap-2 py-2 px-3">
                 <LangToggle lang={lang} setLang={setLang} theme={theme} />
@@ -634,7 +631,7 @@ function QuickPreview({ lang, theme }: { lang: Lang; theme: Theme }) {
                 return (
                   <motion.a
                     key={`${project.title}-${projectIndex}`}
-                    href="#projects"
+                    href="/projects"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: idx * 0.1 }}
@@ -733,15 +730,17 @@ function Hero({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProje
             <Diamond className="w-3.5 h-3.5 text-[#1d3fba]" />
             <span className={tc(theme, "text-[#e9e9e9]", "text-[#1d3fba]")}>{t.label}</span>
           </motion.div>
-          <motion.h1 variants={headlineAnim} className={`text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight ${tc(theme, "text-white", "text-[#0b0b0b]")}` }>
+          <motion.h1 variants={headlineAnim} className={`text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight ${tc(theme, "text-white", "text-[#0b0b0b]")}` }>
             {t.title}
           </motion.h1>
         </motion.div>
 
         {/* Marquees — full width, outside max-w-4xl but inside max-w-7xl */}
+        <div className="h-12 sm:h-16" />
         <ServicesMarquee lang={lang} theme={theme} />
         <ProjectsMarquee lang={lang} theme={theme} dynProjects={dynProjects} />
         <FeaturedWorkMarquee lang={lang} theme={theme} />
+        <HeroIntro lang={lang} theme={theme} />
       </div>
     </section>
   );
@@ -766,23 +765,27 @@ function HeroIntro({ lang, theme }: { lang: Lang; theme: Theme }) {
           <motion.p variants={paraAnim} className={`mt-4 text-sm sm:text-base max-w-3xl mx-auto leading-relaxed ${tc(theme, "text-[#e9e9e9]/60", "text-[#5b6472]")}` }>
             {t.para}
           </motion.p>
-          <motion.div variants={buttonsAnim} className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <motion.div variants={badgesAnim} className="mb-8 flex flex-wrap items-center justify-center gap-2">
+            {t.badges.map((badge) => (
+              <motion.span
+                key={badge}
+                variants={badgeItem}
+                className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur ${tc(theme, "border-white/10 bg-white/[0.04] text-[#e9e9e9]/85", "border-[#1d3fba]/15 bg-white/60 text-[#3d4451]")}` }
+              >
+                {badge}
+              </motion.span>
+            ))}
+          </motion.div>
+          <motion.div variants={buttonsAnim} className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <a href="/booking" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1d3fba] text-white font-bold hover:brightness-110 blue-glow transition-all">
               {t.primary} <ChevronRight className="w-4 h-4" />
             </a>
             <a href="#services" className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border backdrop-blur-md transition-colors ${tc(theme, "border-white/15 bg-white/[0.04] text-white hover:bg-white/[0.08]", "border-[#1d3fba]/20 bg-white/60 text-[#111111] hover:bg-white/90")}` }>
               {t.secondary}
             </a>
-            <a href="#partners" className={`inline-flex items-center gap-1 text-sm px-3 py-2 hover:text-[#1d3fba] underline-offset-4 hover:underline transition-colors ${tc(theme, "text-[#e9e9e9]/70", "text-[#5b6472]")}` }>
+            <a href="/partners" className={`inline-flex items-center gap-1 text-sm px-3 py-2 hover:text-[#1d3fba] underline-offset-4 hover:underline transition-colors ${tc(theme, "text-[#e9e9e9]/70", "text-[#5b6472]")}` }>
               {t.third} <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
-          </motion.div>
-          <motion.div variants={badgesAnim} className="mt-12 flex flex-wrap items-center justify-center gap-2">
-            {t.badges.map((b) => (
-              <motion.span key={b} variants={badgeItem} className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur ${tc(theme, "border-white/10 bg-white/[0.04] text-[#e9e9e9]/85", "border-[#1d3fba]/15 bg-white/60 text-[#3d4451]")}` }>
-                {b}
-              </motion.span>
-            ))}
           </motion.div>
         </motion.div>
       </div>
@@ -875,7 +878,7 @@ function ProjectsMarquee({ lang, theme, dynProjects }: { lang: Lang; theme: Them
           {cards.map((card, i) => {
             const baseIndex = i % base.length;
             const isBroken = !!brokenImages[baseIndex];
-            const href = card.id ? `/projects/${card.id}` : "#projects";
+const href = card.id ? `/projects/${card.id}` : "/projects";
 
             return (
             <a
@@ -976,7 +979,7 @@ function FeaturedWorkMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
             return (
             <a
               key={i}
-              href="#partners"
+              href="/partners"
               aria-hidden={i >= PROJECT_IMAGES.length}
               className="group relative shrink-0 mr-5 w-[260px] sm:w-[320px] lg:w-[360px] rounded-2xl overflow-hidden p-2 transition-transform duration-300 hover:scale-[1.03] cursor-pointer"
               style={cardStyle}
@@ -1491,7 +1494,7 @@ function ProcessSection({ lang, theme }: { lang: Lang; theme: Theme }) {
 }
 
 /* ---------------- Projects (with logo) ---------------- */
-function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null }) {
+export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null }) {
   const t = translations[lang].projects;
   const isAr = lang === "ar";
 
@@ -1551,7 +1554,7 @@ function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; theme: Them
 }
 
 /* ---------------- Partners marquee ---------------- */
-function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Theme; dynPartners: DbPartner[] | null }) {
+export function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Theme; dynPartners: DbPartner[] | null }) {
   const t = translations[lang].partners;
 
   return (
@@ -1741,7 +1744,7 @@ function InputField({ label, type = "text", required, theme, value, onChange }: 
 }
 
 /* ---------------- Footer ---------------- */
-function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
+export function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
   const t = translations[lang].footer;
   const isAr = lang === "ar";
 
@@ -1752,8 +1755,8 @@ function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
     { label: isAr ? "الخدمات"      : "Services", href: "#services" },
     { label: isAr ? "الحجز"        : "Booking",  href: "/booking" },
     { label: isAr ? "الوظائف"      : "Careers",  href: "/jobs" },
-    { label: isAr ? "المشاريع"     : "Projects", href: "#projects" },
-    { label: isAr ? "الشركاء"      : "Partners", href: "#partners" },
+    { label: isAr ? "المشاريع"     : "Projects", href: "/projects" },
+    { label: isAr ? "الشركاء"      : "Partners", href: "/partners" },
     { label: isAr ? "تواصل معنا"   : "Contact",  href: "#contact" },
   ];
 
@@ -1845,7 +1848,7 @@ function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
 }
 
 /* ---------------- Floating actions ---------------- */
-function FloatingActions({ lang, theme }: { lang: Lang; theme: Theme }) {
+export function FloatingActions({ lang, theme }: { lang: Lang; theme: Theme }) {
   const t = translations[lang].floating;
   return (
     <motion.div

@@ -9,14 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as BookingRouteImport } from './routes/booking'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
 import { Route as AdminJobsPositionsRouteImport } from './routes/admin/jobs-positions'
 import { Route as AdminJobApplicationsRouteImport } from './routes/admin/job-applications'
 
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -35,6 +42,11 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
@@ -58,18 +70,22 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/booking': typeof BookingRoute
   '/jobs': typeof JobsRoute
+  '/partners': typeof PartnersRoute
   '/admin/job-applications': typeof AdminJobApplicationsRoute
   '/admin/jobs-positions': typeof AdminJobsPositionsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/booking': typeof BookingRoute
   '/jobs': typeof JobsRoute
+  '/partners': typeof PartnersRoute
   '/admin/job-applications': typeof AdminJobApplicationsRoute
   '/admin/jobs-positions': typeof AdminJobsPositionsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,9 +93,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/booking': typeof BookingRoute
   '/jobs': typeof JobsRoute
+  '/partners': typeof PartnersRoute
   '/admin/job-applications': typeof AdminJobApplicationsRoute
   '/admin/jobs-positions': typeof AdminJobsPositionsRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,27 +106,33 @@ export interface FileRouteTypes {
     | '/admin'
     | '/booking'
     | '/jobs'
+    | '/partners'
     | '/admin/job-applications'
     | '/admin/jobs-positions'
     | '/projects/$projectId'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/booking'
     | '/jobs'
+    | '/partners'
     | '/admin/job-applications'
     | '/admin/jobs-positions'
     | '/projects/$projectId'
+    | '/projects'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/booking'
     | '/jobs'
+    | '/partners'
     | '/admin/job-applications'
     | '/admin/jobs-positions'
     | '/projects/$projectId'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,11 +140,20 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BookingRoute: typeof BookingRoute
   JobsRoute: typeof JobsRoute
+  PartnersRoute: typeof PartnersRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jobs': {
       id: '/jobs'
       path: '/jobs'
@@ -147,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/$projectId': {
@@ -190,7 +230,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BookingRoute: BookingRoute,
   JobsRoute: JobsRoute,
+  PartnersRoute: PartnersRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
