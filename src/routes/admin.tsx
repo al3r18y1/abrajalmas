@@ -5,7 +5,7 @@ import {
   Package, FolderOpen, Users, Calendar, ExternalLink,
   CheckCircle2, AlertCircle, Loader2, Eye, EyeOff,
   Lock, ImageIcon, Link as LinkIcon, ChevronDown, ChevronUp,
-  RefreshCw, Star,
+  RefreshCw, Star, Settings,
 } from "lucide-react";
 import {
   supabase, isSupabaseConfigured, resizeImage, uploadImage,
@@ -14,12 +14,21 @@ import {
 import logoSymbol from "@/assets/abraj-logo-symbol.png";
 
 /* ─── Auth ──────────────────────────────────────────────────── */
-const ADMIN_PWD = (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) ?? "abraj2024admin";
+const DEFAULT_PWD = (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) ?? "abraj2024admin";
+const PWD_OVERRIDE_KEY = "abraj-admin-pwd";
 const AUTH_KEY  = "abraj-admin-v1";
 const makeToken = (p: string) => btoa("ABRAJ_ALMAS:" + p);
-const isAuthed  = () => { try { return localStorage.getItem(AUTH_KEY) === makeToken(ADMIN_PWD); } catch { return false; } };
-const doLogin   = (p: string) => { if (p === ADMIN_PWD) { localStorage.setItem(AUTH_KEY, makeToken(ADMIN_PWD)); return true; } return false; };
+const getActivePwd = () => { try { return localStorage.getItem(PWD_OVERRIDE_KEY) || DEFAULT_PWD; } catch { return DEFAULT_PWD; } };
+const isAuthed  = () => { try { return localStorage.getItem(AUTH_KEY) === makeToken(getActivePwd()); } catch { return false; } };
+const doLogin   = (p: string) => { const pwd = getActivePwd(); if (p === pwd) { localStorage.setItem(AUTH_KEY, makeToken(pwd)); return true; } return false; };
 const doLogout  = () => localStorage.removeItem(AUTH_KEY);
+const doChangePwd = (oldPwd: string, newPwd: string): { ok: boolean; msg: string } => {
+  if (oldPwd !== getActivePwd()) return { ok: false, msg: "كلمة المرور الحالية غير صحيحة" };
+  if (newPwd.length < 6) return { ok: false, msg: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" };
+  localStorage.setItem(PWD_OVERRIDE_KEY, newPwd);
+  localStorage.setItem(AUTH_KEY, makeToken(newPwd));
+  return { ok: true, msg: "تم تغيير كلمة المرور بنجاح" };
+};
 
 /* ─── Route ─────────────────────────────────────────────────── */
 export const Route = createFileRoute("/admin")({
@@ -53,7 +62,7 @@ function Toasts({ toasts }: { toasts: ToastItem[] }) {
 }
 
 /* ─── Tabs ───────────────────────────────────────────────────── */
-type Tab = "services" | "projects" | "partners" | "bookings";
+type Tab = "services" | "projects" | "partners" | "bookings" | "settings";
 
 /* ═══════════════════════════════════════════════════════════════
    AdminPage
@@ -140,6 +149,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     { id: "projects", label: "المشاريع",   Icon: FolderOpen },
     { id: "partners", label: "الشركاء",    Icon: Users      },
     { id: "bookings", label: "طلبات الحجز", Icon: Calendar  },
+    { id: "settings", label: "الإعدادات",  Icon: Settings   },
   ];
 
   return (
@@ -189,6 +199,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         {tab === "projects" && <ProjectsTab toast={{ ok, err }} />}
         {tab === "partners" && <PartnersTab toast={{ ok, err }} />}
         {tab === "bookings" && <BookingsTab toast={{ ok, err }} />}
+        {tab === "settings" && <SettingsTab toast={{ ok, err }} />}
       </main>
 
       <Toasts toasts={toasts} />
@@ -197,6 +208,124 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 }
 
 type Toast = { ok: (m: string) => void; err: (m: string) => void };
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS TAB — change password
+═══════════════════════════════════════════════════════════════ */
+function SettingsTab({ toast }: { toast: Toast }) {
+  const [oldPwd,  setOldPwd]  = useState("");
+  const [newPwd,  setNewPwd]  = useState("");
+  const [confPwd, setConfPwd] = useState("");
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [error,   setError]   = useState("");
+  const [saving,  setSaving]  = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (newPwd !== confPwd) { setError("كلمة المرور الجديدة وتأكيدها غير متطابقين"); return; }
+    if (newPwd.length < 6)  { setError("يجب أن تكون كلمة المرور 6 أحرف على الأقل"); return; }
+    setSaving(true);
+    setTimeout(() => {
+      const result = doChangePwd(oldPwd, newPwd);
+      setSaving(false);
+      if (result.ok) {
+        toast.ok(result.msg);
+        setOldPwd(""); setNewPwd(""); setConfPwd("");
+      } else {
+        setError(result.msg);
+      }
+    }, 400);
+  };
+
+  return (
+    <div className="max-w-md mx-auto py-8">
+      <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-9 h-9 rounded-xl bg-[#1d3fba]/20 flex items-center justify-center">
+            <Lock className="w-4 h-4 text-[#4d7fff]" />
+          </div>
+          <div>
+            <h2 className="font-bold text-white text-sm">تغيير كلمة المرور</h2>
+            <p className="text-white/40 text-xs mt-0.5">تُحفظ كلمة المرور الجديدة في هذا المتصفح</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Current password */}
+          <div>
+            <label className="block text-xs text-white/50 mb-1.5">كلمة المرور الحالية</label>
+            <div className="relative">
+              <Lock className="absolute top-3 end-3 w-4 h-4 text-white/30 pointer-events-none" />
+              <input
+                type={showOld ? "text" : "password"}
+                value={oldPwd}
+                onChange={e => { setOldPwd(e.target.value); setError(""); }}
+                placeholder="أدخل كلمة المرور الحالية"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pe-10 ps-10 py-2.5 text-white text-sm outline-none focus:border-[#1d3fba]/60 transition-colors"
+                dir="ltr"
+                required
+              />
+              <button type="button" onClick={() => setShowOld(v => !v)} className="absolute top-3 start-3 text-white/30 hover:text-white/60">
+                {showOld ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* New password */}
+          <div>
+            <label className="block text-xs text-white/50 mb-1.5">كلمة المرور الجديدة</label>
+            <div className="relative">
+              <Lock className="absolute top-3 end-3 w-4 h-4 text-white/30 pointer-events-none" />
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPwd}
+                onChange={e => { setNewPwd(e.target.value); setError(""); }}
+                placeholder="6 أحرف على الأقل"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pe-10 ps-10 py-2.5 text-white text-sm outline-none focus:border-[#1d3fba]/60 transition-colors"
+                dir="ltr"
+                required
+              />
+              <button type="button" onClick={() => setShowNew(v => !v)} className="absolute top-3 start-3 text-white/30 hover:text-white/60">
+                {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm */}
+          <div>
+            <label className="block text-xs text-white/50 mb-1.5">تأكيد كلمة المرور الجديدة</label>
+            <input
+              type="password"
+              value={confPwd}
+              onChange={e => { setConfPwd(e.target.value); setError(""); }}
+              placeholder="أعد كتابة كلمة المرور الجديدة"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-[#1d3fba]/60 transition-colors"
+              dir="ltr"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={saving || !oldPwd || !newPwd || !confPwd}
+            className="w-full py-2.5 rounded-xl bg-[#1d3fba] text-white font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            حفظ كلمة المرور الجديدة
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════
    SERVICES TAB
@@ -624,9 +753,12 @@ type PartnerForm = {
 };
 const emptyPartner = (): PartnerForm => ({ name: "", initials: "", color: "#1d3fba", image_url: "", order_num: 0 });
 
+const STATIC_MARQUEE_IMAGES = Array.from({ length: 13 }, (_, i) => `/assets/marquee/proj-${i + 1}.png`);
+
 function PartnersTab({ toast }: { toast: Toast }) {
   const [items, setItems] = useState<DbPartner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [modal, setModal] = useState<{ open: boolean; editing: DbPartner | null }>({ open: false, editing: null });
   const [delConfirm, setDelConfirm] = useState<string | null>(null);
 
@@ -649,6 +781,31 @@ function PartnersTab({ toast }: { toast: Toast }) {
     setDelConfirm(null);
   };
 
+  // Import the 13 static marquee images into Supabase so they become fully editable
+  const handleImportStatics = async () => {
+    if (!supabase) return;
+    setImporting(true);
+    const maxOrder = items.reduce((m, x) => Math.max(m, x.order_num), 0);
+    const toInsert = STATIC_MARQUEE_IMAGES.map((src, i) => ({
+      name: "",
+      initials: `P${i + 1}`,
+      color: "#1d3fba",
+      bg_color: "rgba(29,63,186,0.12)",
+      image_url: src,
+      order_num: maxOrder + i + 1,
+    }));
+    const { data, error } = await supabase.from("partners").insert(toInsert).select();
+    if (error) toast.err("خطأ في الاستيراد: " + error.message);
+    else {
+      setItems(p => [...p, ...(data as DbPartner[])]);
+      toast.ok(`تم استيراد ${STATIC_MARQUEE_IMAGES.length} صورة — يمكنك الآن تعديلها`);
+    }
+    setImporting(false);
+  };
+
+  // True once any static marquee image has been imported into Supabase
+  const alreadyImported = items.some(p => p.image_url?.startsWith("/assets/marquee/"));
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -662,32 +819,70 @@ function PartnersTab({ toast }: { toast: Toast }) {
         </button>
       </div>
 
+      {/* ── الصور الثابتة: تظهر فقط قبل الاستيراد ── */}
+      {!alreadyImported && (
+        <div className="mb-8 p-4 rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+            <div>
+              <p className="text-sm font-bold text-white/80">الصور الثابتة ({STATIC_MARQUEE_IMAGES.length} صورة)</p>
+              <p className="text-[11px] text-white/35 mt-0.5 max-w-xs">
+                استورد هذه الصور إلى قاعدة البيانات لتتمكن من تعديل كل صورة وحذفها وتغيير ترتيبها.
+              </p>
+            </div>
+            <button
+              onClick={handleImportStatics}
+              disabled={importing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1d3fba]/80 hover:bg-[#1d3fba] text-xs font-bold text-white transition-all disabled:opacity-50 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {importing ? "جاري الاستيراد..." : "استيراد إلى قاعدة البيانات"}
+            </button>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-7 gap-2">
+            {STATIC_MARQUEE_IMAGES.map((src, i) => (
+              <div key={i} className="aspect-square rounded-xl overflow-hidden bg-white/[0.04]">
+                <img src={src} alt={`partner ${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── جميع الشركاء (قابلة للتعديل والحذف) ── */}
       {loading ? <Spinner /> : items.length === 0 ? (
-        <EmptyState msg="لا يوجد شركاء. أضف شريكاً جديداً." />
+        <EmptyState msg="لا يوجد شركاء. أضف شريكاً جديداً أو استورد الصور الثابتة أعلاه." />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {items.map(item => (
-            <div key={item.id} className="bg-white/[0.04] border border-white/10 rounded-2xl p-3 flex flex-col items-center gap-2 text-center">
-              {item.image_url ? (
-                <img src={item.image_url} alt={item.name} className="w-12 h-12 rounded-xl object-cover" />
-              ) : (
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black border"
-                  style={{ background: item.bg_color, color: item.color, borderColor: item.color + "40" }}>
-                  {item.initials}
-                </div>
-              )}
-              <span className="text-xs font-bold text-white/80 line-clamp-1">{item.name}</span>
-              <div className="flex gap-1 w-full">
-                <button onClick={() => setModal({ open: true, editing: item })}
-                  className="flex-1 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] transition-colors">✏️</button>
-                {delConfirm === item.id ? (
-                  <>
-                    <button onClick={() => handleDelete(item.id)} className="px-1.5 py-1 rounded-lg bg-red-600/80 text-[10px] font-bold">✓</button>
-                    <button onClick={() => setDelConfirm(null)} className="px-1.5 py-1 rounded-lg bg-white/5 text-[10px]">✕</button>
-                  </>
+            <div key={item.id} className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
+              <div className="aspect-square w-full overflow-hidden">
+                {item.image_url ? (
+                  <img src={item.image_url} alt={item.name || "partner"} className="w-full h-full object-cover" />
                 ) : (
-                  <button onClick={() => setDelConfirm(item.id)} className="px-1.5 py-1 rounded-lg bg-white/5 hover:bg-red-900/40 text-[10px] transition-colors">🗑</button>
+                  <div className="w-full h-full flex items-center justify-center text-xl font-black"
+                    style={{ background: item.bg_color, color: item.color }}>
+                    {item.initials}
+                  </div>
                 )}
+              </div>
+              <div className="p-2 flex flex-col gap-1.5">
+                {item.name ? (
+                  <span className="text-xs font-bold text-white/80 text-center line-clamp-1">{item.name}</span>
+                ) : (
+                  <span className="text-[10px] text-white/25 text-center italic">بدون اسم</span>
+                )}
+                <div className="flex gap-1">
+                  <button onClick={() => setModal({ open: true, editing: item })}
+                    className="flex-1 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] transition-colors">✏️</button>
+                  {delConfirm === item.id ? (
+                    <>
+                      <button onClick={() => handleDelete(item.id)} className="px-1.5 py-1 rounded-lg bg-red-600/80 text-[10px] font-bold">✓</button>
+                      <button onClick={() => setDelConfirm(null)} className="px-1.5 py-1 rounded-lg bg-white/5 text-[10px]">✕</button>
+                    </>
+                  ) : (
+                    <button onClick={() => setDelConfirm(item.id)} className="px-1.5 py-1 rounded-lg bg-white/5 hover:bg-red-900/40 text-[10px] transition-colors">🗑</button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

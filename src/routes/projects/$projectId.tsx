@@ -175,7 +175,7 @@ function ProjectDetailPage() {
         className={`sticky top-0 z-50 flex items-center justify-between px-4 sm:px-8 h-16 border-b backdrop-blur-xl ${tc(theme, "bg-black/70 border-white/8", "bg-white/80 border-[#1d3fba]/10")}`}
       >
         <button
-          onClick={() => navigate({ to: "/", hash: "projects" })}
+          onClick={() => navigate({ to: "/projects/" })}
           className={`inline-flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-70 ${tc(theme, "text-white/80", "text-[#3d4451]")}`}
         >
           {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}

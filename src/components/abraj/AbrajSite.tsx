@@ -117,7 +117,7 @@ export default function AbrajSite() {
         className={`${t.fontClass} ${theme === "day" ? "day-mode" : "night-mode"} transition-colors duration-500 ${tc(theme, "bg-black text-white", "bg-[#f7f8fb] text-[#111111]")} min-h-screen overflow-x-hidden pb-20 lg:pb-0`}
       >
         <Navbar lang={lang} setLang={handleSetLang} theme={theme} setTheme={setTheme} />
-        <Hero lang={lang} theme={theme} dynProjects={dynProjects} />
+        <Hero lang={lang} theme={theme} dynProjects={dynProjects} dynServices={dynServices} dynPartners={dynPartners} />
         <BrandDivider theme={theme} direction="left" />
         <AboutSection lang={lang} theme={theme} />
         <StatsStrip lang={lang} theme={theme} />
@@ -691,7 +691,7 @@ function QuickPreview({ lang, theme }: { lang: Lang; theme: Theme }) {
 }
 
 /* ---------------- Hero ---------------- */
-function Hero({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null }) {
+function Hero({ lang, theme, dynProjects, dynServices, dynPartners }: { lang: Lang; theme: Theme; dynProjects: DbProject[] | null; dynServices: DbService[] | null; dynPartners: DbPartner[] | null }) {
   const t = translations[lang].hero;
   const heroStagger = { hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } };
   const labelAnim = { hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const, delay: 0.1 } } };
@@ -737,9 +737,9 @@ function Hero({ lang, theme, dynProjects }: { lang: Lang; theme: Theme; dynProje
 
         {/* Marquees — full width, outside max-w-4xl but inside max-w-7xl */}
         <div className="h-12 sm:h-16" />
-        <ServicesMarquee lang={lang} theme={theme} />
+        <ServicesMarquee lang={lang} theme={theme} dynServices={dynServices} />
         <ProjectsMarquee lang={lang} theme={theme} dynProjects={dynProjects} />
-        <FeaturedWorkMarquee lang={lang} theme={theme} />
+        <FeaturedWorkMarquee lang={lang} theme={theme} dynPartners={dynPartners} />
         <HeroIntro lang={lang} theme={theme} />
       </div>
     </section>
@@ -798,6 +798,8 @@ function HeroIntro({ lang, theme }: { lang: Lang; theme: Theme }) {
 const PROJECT_IMAGES = Array.from({ length: 12 }, (_, i) => `/assets/projects/project-${i + 2}.png`);
 /** Fallback set (existing assets) to avoid blank cards if primary paths fail */
 const PROJECT_IMAGES_FALLBACK = Array.from({ length: 12 }, (_, i) => `/assets/marquee/proj-${i + 2}.png`);
+/** All 13 marquee images used as base in /partners page */
+const MARQUEE_PARTNER_IMAGES = Array.from({ length: 13 }, (_, i) => `/assets/marquee/proj-${i + 1}.png`);
 
 /** Featured projects: image 1(1) moved from partners + the NEW folder set */
 const FEATURED_PROJECT_IMAGES = [
@@ -920,16 +922,23 @@ const href = card.id ? `/projects/${card.id}` : "/projects";
   );
 }
 
-function FeaturedWorkMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
+function FeaturedWorkMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Theme; dynPartners: DbPartner[] | null }) {
   const isAr = lang === "ar";
-  const [brokenImages, setBrokenImages] = useState<Record<number, boolean>>({});
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   const title = isAr ? "أبرز شركاؤنا" : "Our Top Partners";
   const subtitle = isAr
     ? "العلامات والشركاء الذين نعمل معهم في مشاريعنا التقنية"
     : "The brands and partners we work with across our technical projects";
 
+  // If dynPartners data exists (after admin import), use it exclusively.
+  // Otherwise fall back to the hardcoded static marquee images.
+  const baseImages =
+    dynPartners && dynPartners.length > 0
+      ? dynPartners.filter((p) => !!p.image_url).map((p) => ({ key: p.id, src: p.image_url!, name: p.name }))
+      : MARQUEE_PARTNER_IMAGES.map((src) => ({ key: src, src, name: "" }));
+
   // Duplicate the set twice so the -50% translate loops seamlessly with no gap.
-  const cards = [...PROJECT_IMAGES, ...PROJECT_IMAGES];
+  const cards = [...baseImages, ...baseImages];
 
   // Glassmorphism card styling adapts to the active theme.
   const cardStyle: React.CSSProperties =
@@ -971,26 +980,26 @@ function FeaturedWorkMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
       {/* Marquee viewport — pause on hover handled in CSS via .proj-marquee:hover */}
       <div className={`proj-marquee relative w-full overflow-hidden py-4 rounded-2xl ${tc(theme, "bg-white/[0.02]", "bg-[#1d3fba]/[0.03]")}`}>
         <div className={`proj-marquee-track ${isAr ? "is-rtl" : ""}`}>
-          {cards.map((_, i) => {
-            const baseIndex = i % PROJECT_IMAGES.length;
-            const isBroken = !!brokenImages[baseIndex];
-            const src = isBroken ? PROJECT_IMAGES_FALLBACK[baseIndex] : PROJECT_IMAGES[baseIndex];
+          {cards.map((item, i) => {
+            const itemKey = item.key;
+            const isBroken = !!brokenImages[itemKey];
+            const src = isBroken ? MARQUEE_PARTNER_IMAGES[0] : item.src;
 
             return (
             <a
-              key={i}
+              key={`${itemKey}-${i}`}
               href="/partners"
-              aria-hidden={i >= PROJECT_IMAGES.length}
+              aria-hidden={i >= baseImages.length}
               className="group relative shrink-0 mr-5 w-[260px] sm:w-[320px] lg:w-[360px] rounded-2xl overflow-hidden p-2 transition-transform duration-300 hover:scale-[1.03] cursor-pointer"
               style={cardStyle}
             >
               <div className="relative w-full h-40 sm:h-48 lg:h-56 rounded-xl overflow-hidden">
                 <img
                   src={src}
-                  alt={isAr ? "شعار شريك من أبراج الماس" : "ABRAJ ALMAS partner logo"}
+                  alt={item.name || (isAr ? "شعار شريك من أبراج الماس" : "ABRAJ ALMAS partner logo")}
                   loading="lazy"
                   draggable={false}
-                  onError={() => setBrokenImages((prev) => ({ ...prev, [baseIndex]: true }))}
+                  onError={() => setBrokenImages((prev) => ({ ...prev, [itemKey]: true }))}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {isBroken && (
@@ -1011,13 +1020,15 @@ function FeaturedWorkMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
 }
 
 /* ---------------- Our Services — seamless infinite glass marquee ---------------- */
-function ServicesMarquee({ lang, theme }: { lang: Lang; theme: Theme }) {
+function ServicesMarquee({ lang, theme, dynServices }: { lang: Lang; theme: Theme; dynServices: DbService[] | null }) {
   const isAr = lang === "ar";
   const title = isAr ? "خدماتنا" : "Our Services";
   const subtitle = isAr
     ? "حلولنا التقنية الأساسية التي نقدمها للأفراد والشركات"
     : "Our core technical services for individuals and businesses";
-  const serviceTitles = translations[lang].services.items.map((item) => item.title);
+  const serviceTitles = dynServices
+    ? dynServices.map((s) => isAr ? s.title_ar : (s.title_en || s.title_ar))
+    : translations[lang].services.items.map((item) => item.title);
   const cards = [...serviceTitles, ...serviceTitles];
 
   // Clear glass card tinted with the brand blue (#1d3fba), tuned per theme.
@@ -1499,8 +1510,8 @@ export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; them
   const isAr = lang === "ar";
 
   const displayItems = dynProjects
-    ? dynProjects.map((p) => ({ key: p.id, name: isAr ? p.title_ar : (p.title_en || p.title_ar), category: p.category || t.categories[0], imageUrl: p.image_url }))
-    : t.items.map((name, i) => ({ key: name, name, category: t.categories[i % t.categories.length], imageUrl: null }));
+    ? dynProjects.map((p) => ({ key: p.id, id: p.id, name: isAr ? p.title_ar : (p.title_en || p.title_ar), category: p.category || t.categories[0], imageUrl: p.image_url }))
+    : t.items.map((name, i) => ({ key: name, id: null as string | null, name, category: t.categories[i % t.categories.length], imageUrl: null }));
 
   return (
     <section id="projects" className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -1530,23 +1541,46 @@ export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; them
           </div>
         </motion.div>
         <SectionHeader title={t.title} subtitle={t.subtitle} lang={lang} theme={theme} />
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {displayItems.map((item) => (
-            <motion.div key={item.key} variants={fadeUp} whileHover={{ y: -4 }} className="glass-card p-5 hover:blue-glow transition-all">
-              <div className={`aspect-[4/3] rounded-xl border flex items-center justify-center mb-4 relative overflow-hidden ${tc(theme, "bg-gradient-to-br from-[#1d3fba]/25 via-[#1d3fba]/10 to-transparent border-white/10", "bg-gradient-to-br from-[#1d3fba]/10 via-[#1d3fba]/5 to-transparent border-[#1d3fba]/10")}` }>
-                {item.imageUrl
-                  ? <img src={item.imageUrl} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
-                  : <><Diamond className="w-8 h-8 text-[#1d3fba]/70" /><div className={`absolute inset-0 grid-pattern ${tc(theme, "opacity-30", "opacity-20")}` } /></>}
-              </div>
-              <h3 className={`text-sm font-bold mb-2 line-clamp-2 ${tc(theme, "text-white", "text-[#111111]")}` }>{item.name}</h3>
-              <div className={`text-[10px] uppercase tracking-wider ${tc(theme, "text-[#e9e9e9]/55", "text-[#5b6472]")}` }>
-                {t.categoryLabel}: <span className={tc(theme, "text-white", "text-[#111111]")}>{item.category}</span>
-              </div>
-              <div className={`text-[10px] uppercase tracking-wider mt-1 ${tc(theme, "text-[#e9e9e9]/55", "text-[#5b6472]")}` }>
-                {t.statusLabel}: <span className="text-emerald-500">{t.status}</span>
-              </div>
-            </motion.div>
-          ))}
+        <motion.div initial="hidden" animate="visible" variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {displayItems.map((item) => {
+            const cardContent = (
+              <>
+                <div className={`aspect-[4/3] rounded-xl border flex items-center justify-center mb-4 relative overflow-hidden ${tc(theme, "bg-gradient-to-br from-[#1d3fba]/25 via-[#1d3fba]/10 to-transparent border-white/10", "bg-gradient-to-br from-[#1d3fba]/10 via-[#1d3fba]/5 to-transparent border-[#1d3fba]/10")}` }>
+                  {item.imageUrl
+                    ? <img src={item.imageUrl} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
+                    : <><Diamond className="w-8 h-8 text-[#1d3fba]/70" /><div className={`absolute inset-0 grid-pattern ${tc(theme, "opacity-30", "opacity-20")}` } /></>}
+                  {item.id && (
+                    <div className={`absolute bottom-2 end-2 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md ${tc(theme, "bg-[#1d3fba]/80", "bg-white/90 shadow")}`}>
+                      <ArrowUpRight className={`w-3.5 h-3.5 ${tc(theme, "text-white", "text-[#1d3fba]")}`} />
+                    </div>
+                  )}
+                </div>
+                <h3 className={`text-sm font-bold mb-2 line-clamp-2 ${tc(theme, "text-white", "text-[#111111]")}` }>{item.name}</h3>
+                <div className={`text-[10px] uppercase tracking-wider ${tc(theme, "text-[#e9e9e9]/55", "text-[#5b6472]")}` }>
+                  {t.categoryLabel}: <span className={tc(theme, "text-white", "text-[#111111]")}>{item.category}</span>
+                </div>
+                <div className={`text-[10px] uppercase tracking-wider mt-1 ${tc(theme, "text-[#e9e9e9]/55", "text-[#5b6472]")}` }>
+                  {t.statusLabel}: <span className="text-emerald-500">{t.status}</span>
+                </div>
+              </>
+            );
+
+            return item.id ? (
+              <motion.a
+                key={item.key}
+                href={`/projects/${item.id}`}
+                variants={fadeUp}
+                whileHover={{ y: -4 }}
+                className={`glass-card p-5 hover:blue-glow transition-all block cursor-pointer ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/30")}`}
+              >
+                {cardContent}
+              </motion.a>
+            ) : (
+              <motion.div key={item.key} variants={fadeUp} whileHover={{ y: -4 }} className="glass-card p-5 hover:blue-glow transition-all">
+                {cardContent}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
@@ -1556,42 +1590,62 @@ export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; them
 /* ---------------- Partners marquee ---------------- */
 export function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: Theme; dynPartners: DbPartner[] | null }) {
   const t = translations[lang].partners;
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+
+  // If dynPartners data exists (after admin import), use it exclusively.
+  // Otherwise fall back to the hardcoded static marquee images.
+  const allItems =
+    dynPartners && dynPartners.length > 0
+      ? dynPartners.filter((p) => !!p.image_url).map((p) => ({ key: p.id, src: p.image_url!, name: p.name }))
+      : MARQUEE_PARTNER_IMAGES.map((src, i) => ({ key: `static-${i}`, src, name: "" }));
+
+  const cardStyle: React.CSSProperties =
+    theme === "night"
+      ? { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }
+      : { background: "rgba(255,255,255,0.85)", border: "1px solid rgba(29,63,186,0.12)", boxShadow: "0 4px 18px rgba(29,63,186,0.08)" };
 
   return (
-    <section id="partners" className="relative py-24 px-4 sm:px-6 lg:px-8">
+    <section id="partners" className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <SectionHeader title={t.title} subtitle={t.subtitle} lang={lang} theme={theme} />
-        <div className="flex flex-wrap justify-center gap-4">
-          {dynPartners
-            ? dynPartners.map((p) => (
-                <motion.div key={p.id} whileHover={{ scale: 1.06, y: -4 }} transition={{ duration: 0.2 }}
-                  className={`glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 w-[130px] cursor-default ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/40")}`}>
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-20 h-20 rounded-2xl object-cover" />
+        <motion.div
+          initial="hidden" animate="visible" variants={stagger}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+        >
+          {allItems.map((item) => {
+            const isBroken = !!brokenImages[item.key];
+            return (
+              <motion.div
+                key={item.key}
+                variants={fadeUp}
+                whileHover={{ y: -5, scale: 1.04 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-2xl overflow-hidden cursor-default"
+                style={cardStyle}
+              >
+                <div className="relative w-full aspect-square overflow-hidden rounded-2xl">
+                  {!isBroken ? (
+                    <img
+                      src={item.src}
+                      alt={item.name || "partner logo"}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={() => setBrokenImages((p) => ({ ...p, [item.key]: true }))}
+                    />
                   ) : (
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-lg font-black tracking-tight shrink-0 border transition-all duration-300"
-                      style={{ background: p.bg_color, color: p.color, borderColor: `${p.color}40`, boxShadow: `0 0 12px ${p.color}22` }}>
-                      {p.initials}
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#1d3fba]/10">
+                      <span className="text-3xl font-black text-[#1d3fba]/40">?</span>
                     </div>
                   )}
-                  <span className={`text-xs font-bold tracking-wide text-center leading-tight ${tc(theme, "text-white/80", "text-[#111111]/75")}`}>{p.name}</span>
-                </motion.div>
-              ))
-            : PARTNERS.map((p) => {
-                const meta = PARTNER_META[p] ?? { initials: p.slice(0, 2).toUpperCase(), color: "#1d3fba", bg: "rgba(29,63,186,0.12)" };
-                return (
-                  <motion.div key={p} whileHover={{ scale: 1.06, y: -4 }} transition={{ duration: 0.2 }}
-                    className={`glass-card flex flex-col items-center justify-center gap-3 px-6 py-5 w-[130px] cursor-default ${tc(theme, "hover:border-white/20", "hover:border-[#1d3fba]/40")}`}>
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-lg font-black tracking-tight shrink-0 border transition-all duration-300"
-                      style={{ background: meta.bg, color: meta.color, borderColor: `${meta.color}40`, boxShadow: `0 0 12px ${meta.color}22` }}>
-                      {meta.initials}
-                    </div>
-                    <span className={`text-xs font-bold tracking-wide text-center leading-tight ${tc(theme, "text-white/80", "text-[#111111]/75")}`}>{p}</span>
-                  </motion.div>
-                );
-              })
-          }
-        </div>
+                </div>
+                {item.name && (
+                  <p className={`px-3 py-2 text-xs font-bold text-center truncate ${tc(theme, "text-white/80", "text-[#111111]/75")}`}>
+                    {item.name}
+                  </p>
+                )}
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
@@ -1841,6 +1895,17 @@ export function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
         {/* Bottom bar */}
         <div className={`mt-12 pt-6 border-t text-center text-xs ${tc(theme, "border-white/10 text-[#e9e9e9]/50", "border-[#1d3fba]/10 text-[#5b6472]")}`}>
           {t.copyright}
+          <div className="mt-2">
+            تم التصميم و البرمجة بواسطة{" "}
+            <a
+              href="https://roya-vision.com/"
+              target="_blank"
+              rel="noreferrer"
+              className={`underline underline-offset-2 hover:opacity-80 transition-opacity ${tc(theme, "text-[#e9e9e9]/70", "text-[#1d3fba]")}`}
+            >
+              مركز الرؤية للابتكار الرقمي
+            </a>
+          </div>
         </div>
       </div>
     </footer>

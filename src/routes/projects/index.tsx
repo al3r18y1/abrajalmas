@@ -21,24 +21,26 @@ const tc = (theme: Theme, night: string, day: string) =>
   theme === "night" ? night : day;
 
 function ProjectsPage() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("abraj-theme");
-      if (saved === "day" || saved === "night") return saved;
-    }
-    return "night";
-  });
-  const [lang, setLang] = useState<Lang>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("abraj-lang");
-      if (saved === "ar" || saved === "en") return saved;
-    }
-    return "ar";
-  });
+  const [theme, setTheme] = useState<Theme>("day");
+  const [lang, setLang] = useState<Lang>("ar");
   const [dynProjects, setDynProjects] = useState<DbProject[] | null>(null);
 
   const t = translations[lang];
   const isAr = lang === "ar";
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("abraj-theme");
+      if (savedTheme === "day" || savedTheme === "night") {
+        setTheme(savedTheme);
+      }
+
+      const savedLang = localStorage.getItem("abraj-lang");
+      if (savedLang === "ar" || savedLang === "en") {
+        setLang(savedLang);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -59,7 +61,8 @@ function ProjectsPage() {
       .from("projects")
       .select("*")
       .order("order_num")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error("[Projects] Supabase error:", error);
         if (data?.length) setDynProjects(data as DbProject[]);
       });
   }, []);
