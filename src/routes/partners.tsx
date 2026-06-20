@@ -81,7 +81,7 @@ function PartnersPage() {
           {isAr ? "الرئيسية" : "Home"}
         </Link>
 
-        <img src={theme === "night" ? logoWhite : logoBlack} alt="Abraj Almas" className="h-8 w-auto" />
+        <img src={theme === "night" ? logoWhite : logoBlack} alt="Abraj Almas" loading="eager" decoding="async" className="h-8 w-auto" />
 
         <div className="flex items-center gap-2">
           <button

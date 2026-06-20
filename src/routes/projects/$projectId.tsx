@@ -182,7 +182,7 @@ function ProjectDetailPage() {
           {isAr ? "المشاريع" : "Projects"}
         </button>
 
-        <img src={theme === "night" ? logoWhite : logoBlack} alt="Abraj Almas" className="h-8 w-auto" />
+        <img src={theme === "night" ? logoWhite : logoBlack} alt="Abraj Almas" loading="eager" decoding="async" className="h-8 w-auto" />
 
         <div className="flex items-center gap-2">
           <button
@@ -239,6 +239,9 @@ function ProjectDetailPage() {
               <img
                 src={project.image_url}
                 alt={title}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 className="w-full h-64 sm:h-80 lg:h-[28rem] object-cover"
               />
             ) : (
@@ -339,6 +342,7 @@ function ProjectDetailPage() {
                       src={g}
                       alt={`${title} ${i + 1}`}
                       loading="lazy"
+                      decoding="async"
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </button>

@@ -93,7 +93,7 @@ export default function AbrajSite() {
   }, [theme]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1800);
+    const timer = setTimeout(() => setIsLoading(false), 650);
     return () => clearTimeout(timer);
   }, []);
 
@@ -323,8 +323,18 @@ export function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const nextScrolled = window.scrollY > 20;
+        setScrolled((current) => current === nextScrolled ? current : nextScrolled);
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -651,7 +661,7 @@ function QuickPreview({ lang, theme }: { lang: Lang; theme: Theme }) {
                       )
                     }`}>
                       {project.imageUrl ? (
-                        <img src={project.imageUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={project.imageUrl} alt={project.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
                         <>
                           <div className={`absolute inset-0 ${tc(theme, "bg-gradient-to-br from-[#0a0a0a]/20 to-transparent", "bg-gradient-to-br from-white/50 to-transparent")}`} />
@@ -723,7 +733,7 @@ function Hero({ lang, theme, dynProjects, dynServices, dynPartners }: { lang: La
               transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
               whileHover={{ scale: 1.06 }}
             >
-              <img src={theme === "night" ? logoNight : logoDay} alt="" className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-contain drop-shadow-2xl" />
+              <img src={theme === "night" ? logoNight : logoDay} alt="" loading="eager" decoding="async" fetchPriority="high" className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-contain drop-shadow-2xl" />
             </motion.div>
           </motion.div>
           <motion.div variants={labelAnim} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#1d3fba]/40 bg-[#1d3fba]/10 text-xs sm:text-sm mb-6">
@@ -895,6 +905,7 @@ const href = card.id ? `/projects/${card.id}` : "/projects";
                   src={card.src}
                   alt={card.label}
                   loading="lazy"
+                  decoding="async"
                   draggable={false}
                   onError={() => setBrokenImages((prev) => ({ ...prev, [baseIndex]: true }))}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -998,6 +1009,7 @@ function FeaturedWorkMarquee({ lang, theme, dynPartners }: { lang: Lang; theme: 
                   src={src}
                   alt={item.name || (isAr ? "شعار شريك من أبراج الماس" : "ABRAJ ALMAS partner logo")}
                   loading="lazy"
+                  decoding="async"
                   draggable={false}
                   onError={() => setBrokenImages((prev) => ({ ...prev, [itemKey]: true }))}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -1441,7 +1453,7 @@ function ServicesSection({ lang, theme, dynServices }: { lang: Lang; theme: Them
               <motion.div key={s.key} variants={fadeUp}>
                 <GlowCard className="glass-card p-6 h-full flex flex-col transition-all hover:border-[#1d3fba]/50 group">
                   {s.imageUrl && (
-                    <img src={s.imageUrl} alt={s.title} className="w-full h-32 object-cover rounded-xl mb-4" />
+                    <img src={s.imageUrl} alt={s.title} loading="lazy" decoding="async" className="w-full h-32 object-cover rounded-xl mb-4" />
                   )}
                   {!s.imageUrl && (
                     <motion.div
@@ -1533,7 +1545,7 @@ export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; them
         {/* Logo badge above heading */}
         <motion.div initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex flex-col items-center mb-8">
           <div className="glass-card px-6 py-3 flex items-center gap-3 mb-6 rounded-2xl">
-            <img src={theme === "night" ? logoNight : logoDay} alt="ABRAJ ALMAS" className="h-14 w-auto" />
+            <img src={theme === "night" ? logoNight : logoDay} alt="ABRAJ ALMAS" loading="lazy" decoding="async" className="h-14 w-auto" />
             <div className="text-start">
               <div className={`text-xs font-extrabold tracking-widest ${tc(theme, "text-white", "text-[#0b0b0b]")}` }>ABRAJ ALMAS</div>
               <div className="text-[10px] text-[#1d3fba] font-semibold">{lang === "ar" ? "مشاريع نفخر بها" : "Projects We Are Proud Of"}</div>
@@ -1547,7 +1559,7 @@ export function ProjectsSection({ lang, theme, dynProjects }: { lang: Lang; them
               <>
                 <div className={`aspect-[4/3] rounded-xl border flex items-center justify-center mb-4 relative overflow-hidden ${tc(theme, "bg-gradient-to-br from-[#1d3fba]/25 via-[#1d3fba]/10 to-transparent border-white/10", "bg-gradient-to-br from-[#1d3fba]/10 via-[#1d3fba]/5 to-transparent border-[#1d3fba]/10")}` }>
                   {item.imageUrl
-                    ? <img src={item.imageUrl} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
+                    ? <img src={item.imageUrl} alt={item.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
                     : <><Diamond className="w-8 h-8 text-[#1d3fba]/70" /><div className={`absolute inset-0 grid-pattern ${tc(theme, "opacity-30", "opacity-20")}` } /></>}
                   {item.id && (
                     <div className={`absolute bottom-2 end-2 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md ${tc(theme, "bg-[#1d3fba]/80", "bg-white/90 shadow")}`}>
@@ -1628,6 +1640,8 @@ export function PartnersMarquee({ lang, theme, dynPartners }: { lang: Lang; them
                     <img
                       src={item.src}
                       alt={item.name || "partner logo"}
+                      loading="lazy"
+                      decoding="async"
                       className="absolute inset-0 w-full h-full object-cover"
                       onError={() => setBrokenImages((p) => ({ ...p, [item.key]: true }))}
                     />
@@ -1837,6 +1851,8 @@ export function Footer({ lang, theme }: { lang: Lang; theme: Theme }) {
             <img
               src={theme === "night" ? logoWhite : logoBlack}
               alt={isAr ? "شعار شركة أبراج الماس" : "ABRAJ ALMAS Logo"}
+              loading="lazy"
+              decoding="async"
               className="h-10 w-auto mb-4 object-contain"
             />
             <div className="text-[11px] uppercase tracking-wider text-[#1d3fba] mb-3">{t.tagline}</div>

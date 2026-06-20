@@ -221,6 +221,8 @@ function JobsPage() {
         <img
           src={theme === "night" ? logoWhite : logoBlack}
           alt="Abraj Almas"
+          loading="eager"
+          decoding="async"
           className="h-8 w-auto"
         />
 
